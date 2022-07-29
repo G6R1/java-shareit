@@ -1,4 +1,4 @@
-package ru.yandex.practicum.ShareIt.booking;
+package ru.practicum.shareit.booking;
 
 /**
  *     WAITING — новое бронирование, ожидает одобрения, APPROVED —

@@ -1,8 +1,9 @@
-package ru.yandex.practicum.ShareIt.booking;
+package ru.practicum.shareit.booking.model;
 
 import lombok.Data;
-import ru.yandex.practicum.ShareIt.item.Item;
-import ru.yandex.practicum.ShareIt.user.User;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
 

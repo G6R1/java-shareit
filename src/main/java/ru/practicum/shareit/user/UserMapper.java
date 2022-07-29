@@ -1,7 +1,7 @@
-package ru.yandex.practicum.ShareIt.user;
+package ru.practicum.shareit.user;
 
-import ru.yandex.practicum.ShareIt.item.Item;
-import ru.yandex.practicum.ShareIt.item.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 public class UserMapper {
 
