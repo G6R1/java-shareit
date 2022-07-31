@@ -1,11 +1,15 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
-@Data
+@Getter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
+@Builder
 public class User {
     final private Long id;
     @NotNull
