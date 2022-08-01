@@ -24,6 +24,28 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
+        log.info("error: UserNotFoundExceptionException");
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDuplicateEmailException(final DuplicateEmailException e) {
+        log.info("error: DuplicateEmailException");
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccessDeniedException(final AccessDeniedException e) {
+        log.info("error: AccessDeniedException");
+        return new ErrorResponse(e.getMessage());
+    }
+
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.info("error: " + e.getClass());

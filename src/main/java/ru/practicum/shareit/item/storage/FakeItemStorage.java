@@ -2,11 +2,12 @@ package ru.practicum.shareit.item.storage;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Repository
 public class FakeItemStorage implements ItemStorage{
@@ -39,6 +40,13 @@ public class FakeItemStorage implements ItemStorage{
     @Override
     public Item getItem(Long itemId) {
         return inMemoryStorage.get(itemId);
+    }
+
+    @Override
+    public Collection<Item> getMyItems(Long ownerId) {
+        return inMemoryStorage.values().stream().
+                filter((x) -> Objects.equals(x.getOwnerId(), ownerId)).
+                collect(Collectors.toList());
     }
 
     @Override

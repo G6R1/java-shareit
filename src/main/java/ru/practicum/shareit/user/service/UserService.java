@@ -2,6 +2,8 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.DuplicateEmailException;
+import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
@@ -22,7 +24,7 @@ public class UserService {
             throw new RuntimeException(" Неверное значение id.");
 
         if (isEmailExists(user.getEmail()))
-            throw new RuntimeException(" Этот email уже занят.");
+            throw new DuplicateEmailException();
 
         return userStorage.createUser(user);
     }
@@ -31,21 +33,21 @@ public class UserService {
         if (user.getId() == null)
             throw new RuntimeException(" Неверное значение id.");
 
-        if (!isIdExists(user.getId()))
-            throw new RuntimeException(" Неверное значение id.");
+        if (!isUserIdExists(user.getId()))
+            throw new UserNotFoundException();
 
         //если email изменился, проверка, не занят ли новый email
         if (!user.getEmail().equals(getUser(user.getId()).getEmail())) {
             if (isEmailExists(user.getEmail()))
-                throw new RuntimeException(" Этот email уже занят.");
+                throw new DuplicateEmailException();
         }
 
         return userStorage.patchUser(user);
     }
 
     public User getUser(Long userId) {
-        if (!isIdExists(userId))
-            throw new RuntimeException(" Неверное значение id.");
+        if (!isUserIdExists(userId))
+            throw new UserNotFoundException();
 
         return userStorage.getUser(userId);
     }
@@ -55,8 +57,8 @@ public class UserService {
     }
 
     public boolean deleteUser(Long userId) {
-        if (!isIdExists(userId))
-            throw new RuntimeException(" Неверное значение id.");
+        if (!isUserIdExists(userId))
+            throw new UserNotFoundException();
 
         return userStorage.deleteUser(userId);
     }
@@ -65,7 +67,7 @@ public class UserService {
         return userStorage.getAllUsers().stream().map(User::getEmail).collect(Collectors.toList()).contains(email);
     }
 
-    private boolean isIdExists(Long id) {
+    private boolean isUserIdExists(Long id) {
         return userStorage.getAllUsers().stream().map(User::getId).collect(Collectors.toList()).contains(id);
     }
 }

@@ -18,17 +18,6 @@ public class UserController {
 
     private final UserService userService;
 
-
-
-    /*
-    Контроллер и сервис обмениваются объектами, контролеер плучает и отправляет на запросы ДТО
-
-    Проверь, где в запросах идет целый юзер, агде только его айди как параметр
-     */
-
-
-
-
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;

@@ -13,6 +13,8 @@ public interface ItemStorage {
 
     Item getItem(Long itemId);
 
+    Collection<Item> getMyItems(Long ownerId);
+
     Collection<Item> getAllItems();
 
     boolean deleteItem(Long itemId);

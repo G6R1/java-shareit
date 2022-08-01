@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -26,16 +26,16 @@ public class ItemController {
     }
 
     @PostMapping()
-    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
+    public ItemDto createItem(@Valid @RequestBody Item item,
                               @RequestHeader("X-Sharer-User-Id") Long id) {
-        Item itemFromDto = new Item(null,
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
+        Item itemWithOwnerId = new Item(item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
                 id,
                 null);
-        ItemDto savedItemDto = ItemMapper.toItemDto(itemService.createItem(itemFromDto));
-        log.info("Выполнен запрос createUser");
+        ItemDto savedItemDto = ItemMapper.toItemDto(itemService.createItem(itemWithOwnerId));
+        log.info("Выполнен запрос createItem");
         return savedItemDto;
     }
 
@@ -47,13 +47,15 @@ public class ItemController {
                           @RequestHeader("X-Sharer-User-Id") Long id) {
         Item oldItem = itemService.getItem(itemId);
 
-
-        User newUser = new User(id,
-                userDto.getName() == null? oldUser.getName() : userDto.getName(),
-                userDto.getEmail() == null? oldUser.getEmail() : userDto.getEmail());
-        User savedUser = userService.patchUser(newUser);
-        log.info("Выполнен запрос patchUser");
-        return savedUser;
+        Item newItem = new Item(itemId,
+                itemDto.getName() == null? oldItem.getName() : itemDto.getName(),
+                itemDto.getDescription() == null? oldItem.getDescription() : itemDto.getDescription(),
+                itemDto.getAvailable() == null? oldItem.getAvailable() : itemDto.getAvailable(),
+                id,
+                null);
+        Item savedItem = itemService.patchItem(newItem);
+        log.info("Выполнен запрос patchItem");
+        return ItemMapper.toItemDto(savedItem);
     }
 
 
@@ -62,14 +64,18 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDto getItem(@PathVariable Long itemId,
                            @RequestHeader("X-Sharer-User-Id") Long id) {
-
+        Item foundItem = itemService.getItem(itemId);
+        log.info("Выполнен запрос getItem");
+        return ItemMapper.toItemDto(foundItem);
     }
 
 
     //Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
     @GetMapping()
     public Collection<ItemDto> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
-
+        List<Item> itemList = List.copyOf(itemService.getMyItems(id));
+        log.info("Выполнен запрос getMyItems");
+        return itemList.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
     /*
@@ -79,12 +85,13 @@ public class ItemController {
     Проверьте, что поиск возвращает только доступные для аренды вещи.
      */
     @GetMapping("/search")
-    public ItemDto getItem(@RequestParam String text,
+    public Collection<ItemDto> searchItems(@RequestParam String text,
                            @RequestHeader("X-Sharer-User-Id") Long id) {
 
+        List<Item> foundItems = new ArrayList<>(itemService.searchItems(text));
+        log.info("Выполнен запрос searchItems");
+        return foundItems.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
-
-
 
 
     /* не используется

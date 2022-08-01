@@ -20,7 +20,7 @@ public class FakeUserStorage implements UserStorage{
     @Override
     public User createUser(User user) {
         User userForSave = new User(idCounter, user.getName(), user.getEmail());
-        inMemoryStorage.put(idCounter, userForSave);
+        inMemoryStorage.put(idCounter++, userForSave);
         return userForSave;
     }
 
