@@ -29,20 +29,21 @@ public class UserService {
         return userStorage.createUser(user);
     }
 
-    public User patchUser(User user) {
-        if (user.getId() == null)
+    public User patchUser(Long ownerId, User noValidParamsUser) {
+        if (ownerId == null)
             throw new RuntimeException(" Неверное значение id.");
 
-        if (!isUserIdExists(user.getId()))
-            throw new UserNotFoundException();
+        User oldUser = getUser(ownerId);
 
         //если email изменился, проверка, не занят ли новый email
-        if (!user.getEmail().equals(getUser(user.getId()).getEmail())) {
-            if (isEmailExists(user.getEmail()))
+        if (!oldUser.getEmail().equals(noValidParamsUser.getEmail())) {
+            if (isEmailExists(noValidParamsUser.getEmail()))
                 throw new DuplicateEmailException();
         }
 
-        return userStorage.patchUser(user);
+        return userStorage.patchUser(new User(ownerId,
+                noValidParamsUser.getName() == null ? oldUser.getName() : noValidParamsUser.getName(),
+                noValidParamsUser.getEmail() == null ? oldUser.getEmail() : noValidParamsUser.getEmail()));
     }
 
     public User getUser(Long userId) {

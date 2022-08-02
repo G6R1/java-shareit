@@ -26,15 +26,9 @@ public class ItemController {
     }
 
     @PostMapping()
-    public ItemDto createItem(@Valid @RequestBody Item item,
+    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Long id) {
-        Item itemWithOwnerId = new Item(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                id,
-                null);
-        ItemDto savedItemDto = ItemMapper.toItemDto(itemService.createItem(itemWithOwnerId));
+        ItemDto savedItemDto = ItemMapper.toItemDto(itemService.createItem(ItemMapper.toItem(itemDto, id, null)));
         log.info("Выполнен запрос createItem");
         return savedItemDto;
     }
@@ -45,15 +39,8 @@ public class ItemController {
     public ItemDto patchItem(@PathVariable Long itemId,
                           @Valid @RequestBody ItemDto itemDto,
                           @RequestHeader("X-Sharer-User-Id") Long id) {
-        Item oldItem = itemService.getItem(itemId);
 
-        Item newItem = new Item(itemId,
-                itemDto.getName() == null? oldItem.getName() : itemDto.getName(),
-                itemDto.getDescription() == null? oldItem.getDescription() : itemDto.getDescription(),
-                itemDto.getAvailable() == null? oldItem.getAvailable() : itemDto.getAvailable(),
-                id,
-                null);
-        Item savedItem = itemService.patchItem(newItem);
+        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto, id, null));
         log.info("Выполнен запрос patchItem");
         return ItemMapper.toItemDto(savedItem);
     }

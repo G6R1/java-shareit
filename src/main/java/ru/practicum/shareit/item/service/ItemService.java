@@ -3,11 +3,11 @@ package ru.practicum.shareit.item.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,31 +26,40 @@ public class ItemService {
         this.userService = userService;
     }
 
-    public Item createItem(@Valid Item item) {
-        if (item.getId() != null)
+    public Item createItem(Item noValidParamsItem) {
+        if (noValidParamsItem.getId() != null)
             throw new RuntimeException(" Неверное значение id.");
 
-        if (item.getName() == null || item.getDescription() == null || item.getAvailable() == null)
-            throw new RuntimeException(" Название, описание и статус вещи не могут быть пустыми.");
+        //валидируем параметры т.к. не можем валидировать аннотациями из-за приема DTO
+        if (noValidParamsItem.getName() == null
+                || noValidParamsItem.getName().isBlank()
+                || noValidParamsItem.getDescription() == null
+                || noValidParamsItem.getDescription().isBlank()
+                || noValidParamsItem.getAvailable() == null)
+            throw new InvalidParamException(" Название, описание и статус вещи не могут быть null/empty");
 
         //проверка, существует ли юзер с таким id
-        userService.getUser(item.getOwnerId());
+        userService.getUser(noValidParamsItem.getOwnerId());
 
-        return itemStorage.createItem(item);
+        return itemStorage.createItem(noValidParamsItem);
     }
 
-    public Item patchItem(Item item) {
-        if (item.getId() == null)
+    public Item patchItem(Long itemId, Item noValidParamsItem) {
+        if (itemId == null)
             throw new RuntimeException(" Неверное значение id.");
 
-        if (!isItemIdExists(item.getId()))
-            throw new RuntimeException(" Несуществующий id.");
+        Item oldItem = getItem(itemId);
 
         //проверка, что редактирует владелец вещи
-        if (!Objects.equals(item.getOwnerId(), getItem(item.getId()).getOwnerId()))
+        if (!Objects.equals(noValidParamsItem.getOwnerId(), oldItem.getOwnerId()))
             throw new AccessDeniedException();
 
-        return itemStorage.patchItem(item);
+        return itemStorage.patchItem(new Item(itemId,
+                noValidParamsItem.getName() == null ? oldItem.getName() : noValidParamsItem.getName(),
+                noValidParamsItem.getDescription() == null ? oldItem.getDescription() : noValidParamsItem.getDescription(),
+                noValidParamsItem.getAvailable() == null ? oldItem.getAvailable() : noValidParamsItem.getAvailable(),
+                oldItem.getOwnerId(),
+                null));
     }
 
     public Item getItem(Long itemId) {
@@ -88,7 +97,7 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
-    private boolean isItemIdExists (Long id) {
+    private boolean isItemIdExists(Long id) {
         return itemStorage.getAllItems().stream().map(Item::getId).collect(Collectors.toList()).contains(id);
     }
 }

@@ -46,6 +46,14 @@ public class ErrorHandler {
 
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidParamException(final InvalidParamException e) {
+        log.info("error: InvalidParamException");
+        return new ErrorResponse(e.getMessage());
+    }
+
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.info("error: " + e.getClass());

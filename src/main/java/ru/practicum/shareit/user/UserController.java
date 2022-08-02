@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -31,12 +30,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public User patchUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
-        User oldUser = userService.getUser(id);
-        User newUser = new User(id,
-                userDto.getName() == null? oldUser.getName() : userDto.getName(),
-                userDto.getEmail() == null? oldUser.getEmail() : userDto.getEmail());
-        User savedUser = userService.patchUser(newUser);
+    public User patchUser(@PathVariable Long id, @RequestBody User user) {
+        User savedUser = userService.patchUser(id, user);
         log.info("Выполнен запрос patchUser");
         return savedUser;
     }
