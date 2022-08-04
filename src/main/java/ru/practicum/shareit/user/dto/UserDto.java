@@ -1,23 +1,17 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.user.dto;
 
 import lombok.*;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode
 @Builder
-public class User {
+public class UserDto {
     final private Long id;
-    @NotNull
-    @NotBlank
     final private String name;
     @Email
-    @NotNull
-    @NotBlank
     final private String email; //учтите, что два пользователя не могут иметь одинаковый адрес электронной почты
 }

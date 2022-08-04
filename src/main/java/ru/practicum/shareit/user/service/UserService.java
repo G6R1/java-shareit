@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.DuplicateEmailException;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -19,21 +20,27 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User createUser(User user) {
-        if (user.getId() != null)
+    public User createUser(User noValidParamUser) {
+        if (noValidParamUser.getId() != null)
             throw new RuntimeException(" Неверное значение id.");
 
-        if (isEmailExists(user.getEmail()))
+        if (noValidParamUser.getName() == null
+            || noValidParamUser.getName().isBlank()
+            || noValidParamUser.getEmail() == null
+            || noValidParamUser.getEmail().isBlank())
+            throw new InvalidParamException(" Название и email не могут быть null/empty");
+
+        if (isEmailExists(noValidParamUser.getEmail()))
             throw new DuplicateEmailException();
 
-        return userStorage.createUser(user);
+        return userStorage.createUser(noValidParamUser);
     }
 
-    public User patchUser(Long ownerId, User noValidParamsUser) {
-        if (ownerId == null)
+    public User patchUser(Long userId, User noValidParamsUser) {
+        if (userId == null)
             throw new RuntimeException(" Неверное значение id.");
 
-        User oldUser = getUser(ownerId);
+        User oldUser = getUser(userId);
 
         //если email изменился, проверка, не занят ли новый email
         if (!oldUser.getEmail().equals(noValidParamsUser.getEmail())) {
@@ -41,7 +48,7 @@ public class UserService {
                 throw new DuplicateEmailException();
         }
 
-        return userStorage.patchUser(new User(ownerId,
+        return userStorage.patchUser(new User(userId,
                 noValidParamsUser.getName() == null ? oldUser.getName() : noValidParamsUser.getName(),
                 noValidParamsUser.getEmail() == null ? oldUser.getEmail() : noValidParamsUser.getEmail()));
     }

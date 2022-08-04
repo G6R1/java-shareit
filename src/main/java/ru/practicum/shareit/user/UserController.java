@@ -3,12 +3,14 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -23,31 +25,31 @@ public class UserController {
     }
 
     @PostMapping()
-    public User createUser(@Valid @RequestBody User user) {
-        User savedUser = userService.createUser(user);
+    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
+        User savedUser = userService.createUser(UserMapper.toUser(userDto));
         log.info("Выполнен запрос createUser");
-        return savedUser;
+        return UserMapper.toUserDto(savedUser);
     }
 
     @PatchMapping("/{id}")
-    public User patchUser(@PathVariable Long id, @RequestBody User user) {
-        User savedUser = userService.patchUser(id, user);
+    public UserDto patchUser(@PathVariable Long id, @Valid @RequestBody UserDto userdto) {
+        User savedUser = userService.patchUser(id, UserMapper.toUser(userdto));
         log.info("Выполнен запрос patchUser");
-        return savedUser;
+        return UserMapper.toUserDto(savedUser);
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public UserDto getUser(@PathVariable Long id) {
         User foundUser = userService.getUser(id);
         log.info("Выполнен запрос getUser");
-        return foundUser;
+        return UserMapper.toUserDto(foundUser);
     }
 
     @GetMapping()
-    public Collection<User> getAllUser() {
+    public Collection<UserDto> getAllUser() {
         List<User> userList = List.copyOf(userService.getAllUsers());
         log.info("Выполнен запрос getAllUser");
-        return userList;
+        return userList.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
     }
 
     @DeleteMapping("/{id}")
