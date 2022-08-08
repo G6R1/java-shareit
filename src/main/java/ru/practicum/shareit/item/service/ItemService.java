@@ -38,9 +38,6 @@ public class ItemService {
                 || noValidParamsItem.getAvailable() == null)
             throw new InvalidParamException(" Название, описание и статус вещи не могут быть null/empty");
 
-        //проверка, существует ли юзер с таким id
-        userService.getUser(noValidParamsItem.getOwnerId());
-
         return itemStorage.createItem(noValidParamsItem);
     }
 
@@ -51,14 +48,14 @@ public class ItemService {
         Item oldItem = getItem(itemId);
 
         //проверка, что редактирует владелец вещи
-        if (!Objects.equals(noValidParamsItem.getOwnerId(), oldItem.getOwnerId()))
+        if (!Objects.equals(noValidParamsItem.getOwner().getId(), oldItem.getOwner().getId()))
             throw new AccessDeniedException();
 
         return itemStorage.patchItem(new Item(itemId,
                 noValidParamsItem.getName() == null ? oldItem.getName() : noValidParamsItem.getName(),
                 noValidParamsItem.getDescription() == null ? oldItem.getDescription() : noValidParamsItem.getDescription(),
                 noValidParamsItem.getAvailable() == null ? oldItem.getAvailable() : noValidParamsItem.getAvailable(),
-                oldItem.getOwnerId(),
+                oldItem.getOwner(),
                 null));
     }
 

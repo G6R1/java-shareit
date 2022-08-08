@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -19,16 +20,21 @@ import java.util.stream.Collectors;
 public class ItemController {
 
     ItemService itemService;
+    UserService userService;
 
     @Autowired
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, UserService userService) {
         this.itemService = itemService;
+        this.userService = userService;
     }
 
     @PostMapping()
     public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Long id) {
-        ItemDto savedItemDto = ItemMapper.toItemDto(itemService.createItem(ItemMapper.toItem(itemDto, id, null)));
+        ItemDto savedItemDto = ItemMapper
+                .toItemDto(itemService
+                        .createItem(ItemMapper
+                                .toItem(itemDto, userService.getUser(id), null)));
         log.info("Выполнен запрос createItem");
         return savedItemDto;
     }
@@ -37,17 +43,18 @@ public class ItemController {
     //Изменить можно название, описание и статус доступа к аренде. Редактировать вещь может только её владелец.
     @PatchMapping("/{itemId}")
     public ItemDto patchItem(@PathVariable Long itemId,
-                          @Valid @RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") Long id) {
+                             @Valid @RequestBody ItemDto itemDto,
+                             @RequestHeader("X-Sharer-User-Id") Long id) {
 
-        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto, id, null));
+        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto,
+                userService.getUser(id),
+                null));
         log.info("Выполнен запрос patchItem");
         return ItemMapper.toItemDto(savedItem);
     }
 
 
-
-    //Информацию о вещи может просмотреть любой пользователь. (главное, что заоловок не Null)
+    //Информацию о вещи может просмотреть любой пользователь.
     @GetMapping("/{itemId}")
     public ItemDto getItem(@PathVariable Long itemId,
                            @RequestHeader("X-Sharer-User-Id") Long id) {
@@ -73,7 +80,7 @@ public class ItemController {
      */
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text,
-                           @RequestHeader("X-Sharer-User-Id") Long id) {
+                                           @RequestHeader("X-Sharer-User-Id") Long id) {
 
         List<Item> foundItems = new ArrayList<>(itemService.searchItems(text));
         log.info("Выполнен запрос searchItems");

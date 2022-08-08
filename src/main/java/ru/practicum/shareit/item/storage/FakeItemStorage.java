@@ -25,7 +25,7 @@ public class FakeItemStorage implements ItemStorage{
         Item itemForSave = new Item(idCounter, item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getOwnerId(),
+                item.getOwner(),
                 item.getRequest());
         inMemoryStorage.put(idCounter++, itemForSave);
         return itemForSave;
@@ -45,7 +45,7 @@ public class FakeItemStorage implements ItemStorage{
     @Override
     public Collection<Item> getMyItems(Long ownerId) {
         return inMemoryStorage.values().stream().
-                filter((x) -> Objects.equals(x.getOwnerId(), ownerId)).
+                filter((x) -> Objects.equals(x.getOwner().getId(), ownerId)).
                 collect(Collectors.toList());
     }
 

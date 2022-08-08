@@ -6,18 +6,17 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Getter
-@RequiredArgsConstructor
-@ToString
-@EqualsAndHashCode
+
+@AllArgsConstructor
 @Builder
+@Data
 public class User {
-    final private Long id;
+    private Long id;
     @NotNull
     @NotBlank
-    final private String name;
+    private String name;
     @Email
     @NotNull
     @NotBlank
-    final private String email; //учтите, что два пользователя не могут иметь одинаковый адрес электронной почты
+    private String email; //учтите, что два пользователя не могут иметь одинаковый адрес электронной почты
 }

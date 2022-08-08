@@ -2,29 +2,28 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Getter
-@RequiredArgsConstructor
-@ToString
-@EqualsAndHashCode
+@AllArgsConstructor
 @Builder
+@Data
 public class Item {
-    final private Long id;
+    private Long id;
     @NotNull
     @NotBlank
-    final private String name;
+    private String name;
     @NotNull
     @NotBlank
-    final private String description;
+    private String description;
     @NotNull
-    final private Boolean available; //статус о том, доступна или нет вещь для аренды
-    final private Long ownerId;
+    private Boolean available; //статус о том, доступна или нет вещь для аренды
+    private User owner;
     //если вещь была создана по запросу другого пользователя,
     // то в этом поле будет храниться ссылка на соответствующий запрос.
-    final private ItemRequest request;
+    private ItemRequest request;
 
 
 }
