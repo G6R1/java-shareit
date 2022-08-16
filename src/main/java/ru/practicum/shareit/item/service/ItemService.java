@@ -2,10 +2,15 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
 import ru.practicum.shareit.exceptions.InvalidParamException;
+import ru.practicum.shareit.exceptions.ItemNotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
@@ -17,13 +22,16 @@ import java.util.stream.Collectors;
 @Service
 public class ItemService {
 
-    ItemStorage itemStorage;
-    UserService userService;
+
+    final private UserService userService;
+    final private BookingRepository bookingRepository;
+    final private ItemRepository itemRepository;
 
     @Autowired
-    public ItemService(ItemStorage itemStorage, UserService userService) {
-        this.itemStorage = itemStorage;
+    public ItemService(UserService userService, BookingRepository bookingRepository, ItemRepository itemRepository) {
         this.userService = userService;
+        this.bookingRepository = bookingRepository;
+        this.itemRepository = itemRepository;
     }
 
     public Item createItem(Item noValidParamsItem) {
@@ -38,7 +46,7 @@ public class ItemService {
                 || noValidParamsItem.getAvailable() == null)
             throw new InvalidParamException(" Название, описание и статус вещи не могут быть null/empty");
 
-        return itemStorage.createItem(noValidParamsItem);
+        return itemRepository.save(noValidParamsItem);
     }
 
     public Item patchItem(Long itemId, Item noValidParamsItem) {
@@ -51,7 +59,8 @@ public class ItemService {
         if (!Objects.equals(noValidParamsItem.getOwner().getId(), oldItem.getOwner().getId()))
             throw new AccessDeniedException();
 
-        return itemStorage.patchItem(new Item(itemId,
+
+        return itemRepository.save(new Item(itemId,
                 noValidParamsItem.getName() == null ? oldItem.getName() : noValidParamsItem.getName(),
                 noValidParamsItem.getDescription() == null ? oldItem.getDescription() : noValidParamsItem.getDescription(),
                 noValidParamsItem.getAvailable() == null ? oldItem.getAvailable() : noValidParamsItem.getAvailable(),
@@ -60,21 +69,40 @@ public class ItemService {
     }
 
     public Item getItem(Long itemId) {
-        if (!isItemIdExists(itemId))
-            throw new RuntimeException(" Несуществующий id.");
-
-        return itemStorage.getItem(itemId);
+        return itemRepository.findById(itemId).orElseThrow(ItemNotFoundException::new);
     }
 
-    public Collection<Item> getMyItems(Long ownerId) {
+    /**
+     * Метот создан для эндпойнта GET /items/{itemId}, т.к. тесты просят при запросе от владельца давать
+     * информацию о прошлом и следующем бронировании, а при иных запросах - нет.
+     * @param itemId -
+     * @param requestorId -
+     * @return -
+     */
+    public ItemDtoForOwner getItemWithOwnerCheck(Long itemId, Long requestorId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(ItemNotFoundException::new);
+
+        if (Objects.equals(item.getOwner().getId(), requestorId))
+            return ItemMapper.ItemDtoForOwnerFromItemAndBookingList(item,
+                    bookingRepository.findAllByItem_IdOrderByStartDesc(itemId));
+
+        return ItemMapper.toItemDtoForOwner(item, null, null);
+    }
+
+    public List<ItemDtoForOwner> getMyItems(Long ownerId) {
         //проверка, существует ли такой пользователь
         userService.getUser(ownerId);
 
-        return itemStorage.getMyItems(ownerId);
+        List<Item> itemList = itemRepository.findAllByOwner_Id(ownerId);
+
+        return itemList.stream().map(x -> {
+            List<Booking> bookingList = bookingRepository.findAllByItem_IdOrderByStartDesc(x.getId());
+            return ItemMapper.ItemDtoForOwnerFromItemAndBookingList(x, bookingList);
+        }).collect(Collectors.toList());
     }
 
-    public Collection<Item> getAllItems() {
-        return itemStorage.getAllItems();
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
     }
 
     /* не используется
@@ -86,15 +114,6 @@ public class ItemService {
         if (text.isBlank())
             return new ArrayList<>();
 
-        List<Item> items = new ArrayList<>(getAllItems());
-        return items.stream()
-                .filter((x) -> x.getName().toLowerCase().contains(text.toLowerCase())
-                        || x.getDescription().toLowerCase().contains(text.toLowerCase()))
-                .filter(Item::getAvailable)
-                .collect(Collectors.toList());
-    }
-
-    private boolean isItemIdExists(Long id) {
-        return itemStorage.getAllItems().stream().map(Item::getId).collect(Collectors.toList()).contains(id);
+        return itemRepository.findAllByNameContainingIgnoreCaseAndAvailableTrueOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text);
     }
 }

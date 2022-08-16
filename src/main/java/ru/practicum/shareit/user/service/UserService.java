@@ -6,18 +6,18 @@ import ru.practicum.shareit.exceptions.DuplicateEmailException;
 import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    UserStorage userStorage;
+
+    final private UserRepository userRepository;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public User createUser(User noValidParamUser) {
@@ -30,10 +30,7 @@ public class UserService {
             || noValidParamUser.getEmail().isBlank())
             throw new InvalidParamException(" Название и email не могут быть null/empty");
 
-        if (isEmailExists(noValidParamUser.getEmail()))
-            throw new DuplicateEmailException();
-
-        return userStorage.createUser(noValidParamUser);
+        return userRepository.save(noValidParamUser);
     }
 
     public User patchUser(Long userId, User noValidParamsUser) {
@@ -42,40 +39,28 @@ public class UserService {
 
         User oldUser = getUser(userId);
 
-        //если email изменился, проверка, не занят ли новый email
-        if (!oldUser.getEmail().equals(noValidParamsUser.getEmail())) {
-            if (isEmailExists(noValidParamsUser.getEmail()))
-                throw new DuplicateEmailException();
-        }
-
-        return userStorage.patchUser(new User(userId,
+        return userRepository.save(new User(userId,
                 noValidParamsUser.getName() == null ? oldUser.getName() : noValidParamsUser.getName(),
                 noValidParamsUser.getEmail() == null ? oldUser.getEmail() : noValidParamsUser.getEmail()));
     }
 
     public User getUser(Long userId) {
-        if (!isUserIdExists(userId))
-            throw new UserNotFoundException();
-
-        return userStorage.getUser(userId);
+        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
     }
 
     public Collection<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userRepository.findAll();
     }
 
     public boolean deleteUser(Long userId) {
         if (!isUserIdExists(userId))
             throw new UserNotFoundException();
 
-        return userStorage.deleteUser(userId);
-    }
-
-    private boolean isEmailExists(String email) {
-        return userStorage.getAllUsers().stream().map(User::getEmail).collect(Collectors.toList()).contains(email);
+        userRepository.deleteById(userId);
+        return true;
     }
 
     private boolean isUserIdExists(Long id) {
-        return userStorage.getAllUsers().stream().map(User::getId).collect(Collectors.toList()).contains(id);
+        return userRepository.findById(id).isPresent();
     }
 }

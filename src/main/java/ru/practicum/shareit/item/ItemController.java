@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
@@ -19,8 +20,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
 
-    ItemService itemService;
-    UserService userService;
+    final private ItemService itemService;
+    final private UserService userService;
 
     @Autowired
     public ItemController(ItemService itemService, UserService userService) {
@@ -56,20 +57,21 @@ public class ItemController {
 
     //Информацию о вещи может просмотреть любой пользователь.
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId,
-                           @RequestHeader("X-Sharer-User-Id") Long id) {
-        Item foundItem = itemService.getItem(itemId);
+    public ItemDtoForOwner getItem(@PathVariable Long itemId,
+                                 @RequestHeader("X-Sharer-User-Id") Long id) {
+
+        ItemDtoForOwner foundItem = itemService.getItemWithOwnerCheck(itemId, id);
         log.info("Выполнен запрос getItem");
-        return ItemMapper.toItemDto(foundItem);
+        return foundItem;
     }
 
 
     //Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
     @GetMapping()
-    public Collection<ItemDto> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
-        List<Item> itemList = List.copyOf(itemService.getMyItems(id));
+    public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
+        List<ItemDtoForOwner> itemList = itemService.getMyItems(id);
         log.info("Выполнен запрос getMyItems");
-        return itemList.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemList;
     }
 
     /*

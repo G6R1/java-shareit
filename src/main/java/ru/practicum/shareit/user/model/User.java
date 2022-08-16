@@ -2,13 +2,12 @@ package ru.practicum.shareit.user.model;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @AllArgsConstructor
@@ -19,6 +18,7 @@ import javax.validation.constraints.NotNull;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
     @NotNull
@@ -28,6 +28,7 @@ public class User {
     @Email
     @NotNull
     @NotBlank
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email; //учтите, что два пользователя не могут иметь одинаковый адрес электронной почты
+
 }
