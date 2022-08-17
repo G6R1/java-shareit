@@ -41,7 +41,8 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 BookingMapper.toBookingDto(last),
-                BookingMapper.toBookingDto(next));
+                BookingMapper.toBookingDto(next),
+                null);
     }
 
     public static ItemDtoForOwner ItemDtoForOwnerFromItemAndBookingList (Item item, List<Booking> bookingList) {

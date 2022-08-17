@@ -1,18 +1,26 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
+import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
+import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDtoForOwner;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,14 +32,18 @@ public class ItemService {
 
 
     final private UserService userService;
+    final private BookingService bookingService;
     final private BookingRepository bookingRepository;
     final private ItemRepository itemRepository;
+    final private CommentRepository commentRepository;
 
     @Autowired
-    public ItemService(UserService userService, BookingRepository bookingRepository, ItemRepository itemRepository) {
+    public ItemService(UserService userService, @Lazy BookingService bookingService, BookingRepository bookingRepository, ItemRepository itemRepository, CommentRepository commentRepository) {
         this.userService = userService;
+        this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
         this.itemRepository = itemRepository;
+        this.commentRepository = commentRepository;
     }
 
     public Item createItem(Item noValidParamsItem) {
@@ -75,18 +87,27 @@ public class ItemService {
     /**
      * Метот создан для эндпойнта GET /items/{itemId}, т.к. тесты просят при запросе от владельца давать
      * информацию о прошлом и следующем бронировании, а при иных запросах - нет.
-     * @param itemId -
+     *
+     * @param itemId      -
      * @param requestorId -
      * @return -
      */
     public ItemDtoForOwner getItemWithOwnerCheck(Long itemId, Long requestorId) {
         Item item = itemRepository.findById(itemId).orElseThrow(ItemNotFoundException::new);
 
-        if (Objects.equals(item.getOwner().getId(), requestorId))
-            return ItemMapper.ItemDtoForOwnerFromItemAndBookingList(item,
-                    bookingRepository.findAllByItem_IdOrderByStartDesc(itemId));
+        List<Comment> comments = commentRepository.findAllByItem_Id(itemId);
 
-        return ItemMapper.toItemDtoForOwner(item, null, null);
+        ItemDtoForOwner returnItemDto;
+        if (Objects.equals(item.getOwner().getId(), requestorId)) {
+            returnItemDto = ItemMapper.ItemDtoForOwnerFromItemAndBookingList(item,
+                    bookingRepository.findAllByItem_IdOrderByStartDesc(itemId));
+        } else {
+            returnItemDto = ItemMapper.toItemDtoForOwner(item, null, null);
+        }
+
+        returnItemDto.setComments(comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList()));
+
+        return returnItemDto;
     }
 
     public List<ItemDtoForOwner> getMyItems(Long ownerId) {
@@ -95,10 +116,21 @@ public class ItemService {
 
         List<Item> itemList = itemRepository.findAllByOwner_Id(ownerId);
 
-        return itemList.stream().map(x -> {
-            List<Booking> bookingList = bookingRepository.findAllByItem_IdOrderByStartDesc(x.getId());
-            return ItemMapper.ItemDtoForOwnerFromItemAndBookingList(x, bookingList);
-        }).collect(Collectors.toList());
+
+        List<ItemDtoForOwner> itemDtoForOwners = itemList.stream()
+                .map(x -> {
+                    List<Booking> bookingList = bookingRepository.findAllByItem_IdOrderByStartDesc(x.getId());
+                    return ItemMapper.ItemDtoForOwnerFromItemAndBookingList(x, bookingList);
+                })
+                .collect(Collectors.toList());
+
+        for (ItemDtoForOwner item : itemDtoForOwners) {
+            item.setComments(commentRepository.findAllByItem_Id(item.getId()).stream()
+                    .map(CommentMapper::toCommentDto)
+                    .collect(Collectors.toList()));
+        }
+
+        return itemDtoForOwners;
     }
 
     public List<Item> getAllItems() {
@@ -115,5 +147,23 @@ public class ItemService {
             return new ArrayList<>();
 
         return itemRepository.findAllByNameContainingIgnoreCaseAndAvailableTrueOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text);
+    }
+
+    /**
+     * только тот кто брал в аренду может оставить отзыв и только после окончания аренды
+     */
+    public Comment createComment(Comment comment, Long itemId, Long createrId) {
+        comment.setItem(getItem(itemId)); //здесь произойдет проверка корректности itemId
+        comment.setAuthor(userService.getUser(createrId)); //здесь произойдет проверка корректности createrId
+        comment.setCreated(LocalDateTime.now());
+
+        if (!bookingService.getAllMyBookings(createrId, BookingState.PAST).stream()
+                .map(x -> x.getItem().getId())
+                .collect(Collectors.toList())
+                .contains(itemId))
+            throw new BadRequestException(" Только тот кто брал вещь в аренду может " +
+                    "оставить отзыв и только после окончания аренды");
+
+        return commentRepository.save(comment);
     }
 }

@@ -3,8 +3,10 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForOwner;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
@@ -58,7 +60,7 @@ public class ItemController {
     //Информацию о вещи может просмотреть любой пользователь.
     @GetMapping("/{itemId}")
     public ItemDtoForOwner getItem(@PathVariable Long itemId,
-                                 @RequestHeader("X-Sharer-User-Id") Long id) {
+                                   @RequestHeader("X-Sharer-User-Id") Long id) {
 
         ItemDtoForOwner foundItem = itemService.getItemWithOwnerCheck(itemId, id);
         log.info("Выполнен запрос getItem");
@@ -90,9 +92,18 @@ public class ItemController {
     }
 
 
-    /* не используется
-    @DeleteMapping("/{itemId}")
-    public void deleteItem(@PathVariable Long itemId) {
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable Long itemId,
+                                    @RequestHeader("X-Sharer-User-Id") Long id) {
 
-    }*/
+        Comment comment = itemService.createComment(CommentMapper.toComment(commentDto, null, null),
+                itemId, id);
+        log.info("Выполнен запрос createComment");
+        return CommentMapper.toCommentDto(comment);
+    }
+
+    /*
+    Отзывы можно будет увидеть по двум эндпоинтам — по GET /items/{itemId} для одной конкретной вещи и по GET /items для всех вещей данного пользователя.
+     */
 }
