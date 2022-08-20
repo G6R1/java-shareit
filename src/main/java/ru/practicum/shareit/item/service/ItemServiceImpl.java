@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
 import ru.practicum.shareit.exceptions.BadRequestException;
@@ -32,13 +32,13 @@ public class ItemServiceImpl implements ItemService{
 
 
     final private UserServiceImpl userService;
-    final private BookingServiceImpl bookingService;
+    final private BookingService bookingService;
     final private BookingRepository bookingRepository;
     final private ItemRepository itemRepository;
     final private CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(UserServiceImpl userService, @Lazy BookingServiceImpl bookingService, BookingRepository bookingRepository, ItemRepository itemRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(UserServiceImpl userService, @Lazy BookingService bookingService, BookingRepository bookingRepository, ItemRepository itemRepository, CommentRepository commentRepository) {
         this.userService = userService;
         this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService{
         if (noValidParamsItem.getId() != null)
             throw new RuntimeException(" Неверное значение id.");
 
-        //валидируем параметры т.к. не можем валидировать аннотациями из-за приема DTO
+        //валидируем параметры
         if (noValidParamsItem.getName() == null
                 || noValidParamsItem.getName().isBlank()
                 || noValidParamsItem.getDescription() == null
@@ -153,7 +153,7 @@ public class ItemServiceImpl implements ItemService{
         if (text.isBlank())
             return new ArrayList<>();
 
-        return itemRepository.findAllByNameContainingIgnoreCaseAndAvailableTrueOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text);
+        return itemRepository.searchItemsContainsTextAvailableTrue(text);
     }
 
     /**

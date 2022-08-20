@@ -8,8 +8,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
 
-    final private ItemServiceImpl itemService;
-    final private UserServiceImpl userService;
+    final private ItemService itemService;
+    final private UserService userService;
 
     @Autowired
-    public ItemController(ItemServiceImpl itemService, UserServiceImpl userService) {
+    public ItemController(ItemService itemService, UserService userService) {
         this.itemService = itemService;
         this.userService = userService;
     }

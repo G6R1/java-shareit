@@ -7,9 +7,9 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     final private BookingRepository bookingRepository;
-    final private UserServiceImpl userService;
-    final private ItemServiceImpl itemService;
+    final private UserService userService;
+    final private ItemService itemService;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, UserServiceImpl userService, ItemServiceImpl itemService) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, ItemService itemService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.itemService = itemService;

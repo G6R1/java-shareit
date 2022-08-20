@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
-    private final BookingServiceImpl bookingService;
+    private final BookingService bookingService;
 
-    public BookingController(BookingServiceImpl bookingService) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
