@@ -1,103 +1,38 @@
 package ru.practicum.shareit.item.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.AccessDeniedException;
-import ru.practicum.shareit.exceptions.InvalidParamException;
+import ru.practicum.shareit.item.dto.ItemDtoForOwner;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.service.UserService;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-@Service
-public class ItemService {
+public interface ItemService {
 
-    ItemStorage itemStorage;
-    UserService userService;
+    Item createItem(Item noValidParamsItem);
 
-    @Autowired
-    public ItemService(ItemStorage itemStorage, UserService userService) {
-        this.itemStorage = itemStorage;
-        this.userService = userService;
-    }
+    Item patchItem(Long itemId, Item noValidParamsItem);
 
-    public Item createItem(Item noValidParamsItem) {
-        if (noValidParamsItem.getId() != null)
-            throw new RuntimeException(" Неверное значение id.");
+    Item getItem(Long itemId);
 
-        //валидируем параметры т.к. не можем валидировать аннотациями из-за приема DTO
-        if (noValidParamsItem.getName() == null
-                || noValidParamsItem.getName().isBlank()
-                || noValidParamsItem.getDescription() == null
-                || noValidParamsItem.getDescription().isBlank()
-                || noValidParamsItem.getAvailable() == null)
-            throw new InvalidParamException(" Название, описание и статус вещи не могут быть null/empty");
+    /**
+     * Метот создан для эндпойнта GET /items/{itemId}, т.к. тесты просят при запросе от владельца давать
+     * информацию о прошлом и следующем бронировании, а при иных запросах - нет.
+     *
+     * @param itemId      -
+     * @param requestorId -
+     * @return -
+     */
+    ItemDtoForOwner getItemWithOwnerCheck(Long itemId, Long requestorId);
 
-        //проверка, существует ли юзер с таким id
-        userService.getUser(noValidParamsItem.getOwnerId());
+    List<ItemDtoForOwner> getMyItems(Long ownerId);
 
-        return itemStorage.createItem(noValidParamsItem);
-    }
+    List<Item> getAllItems();
 
-    public Item patchItem(Long itemId, Item noValidParamsItem) {
-        if (itemId == null)
-            throw new RuntimeException(" Неверное значение id.");
+    Collection<Item> searchItems(String text);
 
-        Item oldItem = getItem(itemId);
-
-        //проверка, что редактирует владелец вещи
-        if (!Objects.equals(noValidParamsItem.getOwnerId(), oldItem.getOwnerId()))
-            throw new AccessDeniedException();
-
-        return itemStorage.patchItem(new Item(itemId,
-                noValidParamsItem.getName() == null ? oldItem.getName() : noValidParamsItem.getName(),
-                noValidParamsItem.getDescription() == null ? oldItem.getDescription() : noValidParamsItem.getDescription(),
-                noValidParamsItem.getAvailable() == null ? oldItem.getAvailable() : noValidParamsItem.getAvailable(),
-                oldItem.getOwnerId(),
-                null));
-    }
-
-    public Item getItem(Long itemId) {
-        if (!isItemIdExists(itemId))
-            throw new RuntimeException(" Несуществующий id.");
-
-        return itemStorage.getItem(itemId);
-    }
-
-    public Collection<Item> getMyItems(Long ownerId) {
-        //проверка, существует ли такой пользователь
-        userService.getUser(ownerId);
-
-        return itemStorage.getMyItems(ownerId);
-    }
-
-    public Collection<Item> getAllItems() {
-        return itemStorage.getAllItems();
-    }
-
-    /* не используется
-    public boolean deleteItem(Long itemId) {
-        return itemStorage.deleteItem(itemId);
-    }*/
-
-    public Collection<Item> searchItems(String text) {
-        if (text.isBlank())
-            return new ArrayList<>();
-
-        List<Item> items = new ArrayList<>(getAllItems());
-        return items.stream()
-                .filter((x) -> x.getName().toLowerCase().contains(text.toLowerCase())
-                        || x.getDescription().toLowerCase().contains(text.toLowerCase()))
-                .filter(Item::getAvailable)
-                .collect(Collectors.toList());
-    }
-
-    private boolean isItemIdExists(Long id) {
-        return itemStorage.getAllItems().stream().map(Item::getId).collect(Collectors.toList()).contains(id);
-    }
+    /**
+     * только тот кто брал в аренду может оставить отзыв и только после окончания аренды
+     */
+    Comment createComment(Comment comment, Long itemId, Long createrId);
 }

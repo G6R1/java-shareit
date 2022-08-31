@@ -3,9 +3,13 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoForOwner;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -18,17 +22,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
 
-    ItemService itemService;
+    final private ItemService itemService;
+    final private UserService userService;
 
     @Autowired
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, UserService userService) {
         this.itemService = itemService;
+        this.userService = userService;
     }
 
     @PostMapping()
     public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Long id) {
-        ItemDto savedItemDto = ItemMapper.toItemDto(itemService.createItem(ItemMapper.toItem(itemDto, id, null)));
+        ItemDto savedItemDto = ItemMapper
+                .toItemDto(itemService
+                        .createItem(ItemMapper
+                                .toItem(itemDto, userService.getUser(id), null)));
         log.info("Выполнен запрос createItem");
         return savedItemDto;
     }
@@ -37,32 +46,34 @@ public class ItemController {
     //Изменить можно название, описание и статус доступа к аренде. Редактировать вещь может только её владелец.
     @PatchMapping("/{itemId}")
     public ItemDto patchItem(@PathVariable Long itemId,
-                          @Valid @RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") Long id) {
+                             @Valid @RequestBody ItemDto itemDto,
+                             @RequestHeader("X-Sharer-User-Id") Long id) {
 
-        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto, id, null));
+        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto,
+                userService.getUser(id),
+                null));
         log.info("Выполнен запрос patchItem");
         return ItemMapper.toItemDto(savedItem);
     }
 
 
-
-    //Информацию о вещи может просмотреть любой пользователь. (главное, что заоловок не Null)
+    //Информацию о вещи может просмотреть любой пользователь.
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId,
-                           @RequestHeader("X-Sharer-User-Id") Long id) {
-        Item foundItem = itemService.getItem(itemId);
+    public ItemDtoForOwner getItem(@PathVariable Long itemId,
+                                   @RequestHeader("X-Sharer-User-Id") Long id) {
+
+        ItemDtoForOwner foundItem = itemService.getItemWithOwnerCheck(itemId, id);
         log.info("Выполнен запрос getItem");
-        return ItemMapper.toItemDto(foundItem);
+        return foundItem;
     }
 
 
     //Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
     @GetMapping()
-    public Collection<ItemDto> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
-        List<Item> itemList = List.copyOf(itemService.getMyItems(id));
+    public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
+        List<ItemDtoForOwner> itemList = itemService.getMyItems(id);
         log.info("Выполнен запрос getMyItems");
-        return itemList.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemList;
     }
 
     /*
@@ -73,7 +84,7 @@ public class ItemController {
      */
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text,
-                           @RequestHeader("X-Sharer-User-Id") Long id) {
+                                           @RequestHeader("X-Sharer-User-Id") Long id) {
 
         List<Item> foundItems = new ArrayList<>(itemService.searchItems(text));
         log.info("Выполнен запрос searchItems");
@@ -81,9 +92,18 @@ public class ItemController {
     }
 
 
-    /* не используется
-    @DeleteMapping("/{itemId}")
-    public void deleteItem(@PathVariable Long itemId) {
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable Long itemId,
+                                    @RequestHeader("X-Sharer-User-Id") Long id) {
 
-    }*/
+        Comment comment = itemService.createComment(CommentMapper.toComment(commentDto, null, null),
+                itemId, id);
+        log.info("Выполнен запрос createComment");
+        return CommentMapper.toCommentDto(comment);
+    }
+
+    /*
+    Отзывы можно будет увидеть по двум эндпоинтам — по GET /items/{itemId} для одной конкретной вещи и по GET /items для всех вещей данного пользователя.
+     */
 }
