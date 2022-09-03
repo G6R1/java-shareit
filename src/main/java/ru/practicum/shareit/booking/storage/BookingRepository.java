@@ -13,21 +13,70 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBooker_IdOrderByStartDesc(@NotNull Long bookerId);
 
+    //@Query(value = "select * " +
+    //        "from bookings as b " +
+    //        "where b.booker_id = ?1 " +
+    //        "ORDER BY b.start_time DESC " +
+    //        "LIMIT ?3 OFFSET ?2", nativeQuery = true)
+    //List<Booking> findPageByBooker_IdOrderByStartDesc(@NotNull Long bookerId,
+    //                                                  @NotNull Integer from,
+    //                                                  @NotNull Integer size);
+
     List<Booking> findAllByStatusAndBooker_IdOrderByStartDesc(@NotNull BookingStatus status,
-                                                                     @NotNull Long bookerId);
+                                                              @NotNull Long bookerId);
+
+
+    //@Query(value = "select * " +
+    //        "from bookings as b " +
+    //        "where b.booker_id = ?2 " +
+    //        "and b.status like ?1" +
+    //        "ORDER BY b.start_time DESC " +
+    //        "LIMIT ?4 OFFSET ?3", nativeQuery = true)
+    //List<Booking> findPageByStatusAndBooker_IdOrderByStartDesc(@NotNull BookingStatus status,
+    //                                                           @NotNull Long bookerId,
+    //                                                           @NotNull Integer from,
+    //                                                           @NotNull Integer size);
 
 
     List<Booking> findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(@NotNull Long bookerId,
-                                                                                     @NotNull LocalDateTime start,
-                                                                                     @NotNull LocalDateTime end);
+                                                                              @NotNull LocalDateTime start,
+                                                                              @NotNull LocalDateTime end);
+
+   // @Query(value = "select * " +
+   //         "from bookings as b " +
+   //         "where b.booker_id = ?1 " +
+   //         "and b.start_time  ?1" +
+   //         "and b.end_time  ?1" +
+   //         "ORDER BY b.start_time DESC " +
+   //         "LIMIT ?5 OFFSET ?4", nativeQuery = true)
+   // List<Booking> findPageByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(@NotNull Long bookerId,
+   //                                                                            @NotNull LocalDateTime start,
+   //                                                                            @NotNull LocalDateTime end,
+   //                                                                            @NotNull Integer from,
+   //                                                                            @NotNull Integer size);
+
 
     List<Booking> findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(@NotNull Long bookerId,
-                                                                                      @NotNull LocalDateTime start,
-                                                                                      @NotNull LocalDateTime end);
+                                                                               @NotNull LocalDateTime start,
+                                                                               @NotNull LocalDateTime end);
+
+    //List<Booking> findPageByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(@NotNull Long bookerId,
+    //                                                                            @NotNull LocalDateTime start,
+    //                                                                            @NotNull LocalDateTime end,
+    //                                                                            @NotNull Integer from,
+    //                                                                            @NotNull Integer size);
+//
 
     List<Booking> findAllByBooker_IdAndStartAfterAndEndAfterOrderByStartDesc(@NotNull Long bookerId,
-                                                                                    @NotNull LocalDateTime start,
-                                                                                    @NotNull LocalDateTime end);
+                                                                             @NotNull LocalDateTime start,
+                                                                             @NotNull LocalDateTime end);
+
+   //List<Booking> findPageByBooker_IdAndStartAfterAndEndAfterOrderByStartDesc(@NotNull Long bookerId,
+   //                                                                          @NotNull LocalDateTime start,
+   //                                                                          @NotNull LocalDateTime end,
+   //                                                                          @NotNull Integer from,
+   //                                                                          @NotNull Integer size);
+
 
     @Query(value = "select b.booking_id, b.start_time, b.end_time, b.item_id, b.booker_id, b.status " +
             "from bookings as b " +

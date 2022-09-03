@@ -13,7 +13,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         //проверка корректности requestorId
         userService.getUser(requestorId);
 
-            List<ItemRequest> itemRequests = new ArrayList<>();
+        List<ItemRequest> itemRequests;
 
         if (from == null || size == null) {
             itemRequests = itemRequestRepository.findAllNotMyRequests(requestorId);

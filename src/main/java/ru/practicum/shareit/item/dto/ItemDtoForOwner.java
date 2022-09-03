@@ -4,10 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.item.model.Comment;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor

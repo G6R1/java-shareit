@@ -12,7 +12,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,31 +82,65 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public List<Booking> getAllMyBookings(Long bookerId, BookingState state) {
+    public List<Booking> getAllMyBookings(Long bookerId, BookingState state, Integer from, Integer size) {
         //проверка, что пользователь существует
         userService.getUser(bookerId);
 
+        boolean isPagination;
+
+        if (from == null || size == null) {
+            isPagination = false;
+        } else {
+            //проверка корректности from и size
+            if (size <= 0 || from < 0)
+                throw new BadRequestException();
+            isPagination = true;
+        }
+
+        List<Booking> bookingList;
+
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByBooker_IdOrderByStartDesc(bookerId);
+                bookingList = bookingRepository.findAllByBooker_IdOrderByStartDesc(bookerId);
+
+                return isPagination ? bookingList.stream()
+                        .skip(from)
+                        .limit(size)
+                        .collect(Collectors.toList())
+                        : bookingList;
             case CURRENT:
-                return bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId,
+                bookingList = bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId,
                         LocalDateTime.now(),
                         LocalDateTime.now());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case PAST:
-                return bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(bookerId,
+                bookingList = bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(bookerId,
                         LocalDateTime.now(),
                         LocalDateTime.now());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case FUTURE:
-                return bookingRepository.findAllByBooker_IdAndStartAfterAndEndAfterOrderByStartDesc(bookerId,
+                bookingList = bookingRepository.findAllByBooker_IdAndStartAfterAndEndAfterOrderByStartDesc(bookerId,
                         LocalDateTime.now(),
                         LocalDateTime.now());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case WAITING:
-                return bookingRepository.findAllByStatusAndBooker_IdOrderByStartDesc(BookingStatus.WAITING,
+                bookingList = bookingRepository.findAllByStatusAndBooker_IdOrderByStartDesc(BookingStatus.WAITING,
                         bookerId);
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case REJECTED:
-                return bookingRepository.findAllByStatusAndBooker_IdOrderByStartDesc(BookingStatus.REJECTED,
+                bookingList = bookingRepository.findAllByStatusAndBooker_IdOrderByStartDesc(BookingStatus.REJECTED,
                         bookerId);
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             default:
                 throw new RuntimeException("Некорректный параметр state.");
         }
@@ -111,60 +148,91 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public List<Booking> getAllBookingsForMyItems(Long ownerId, BookingState state) {
+    public List<Booking> getAllBookingsForMyItems(Long ownerId, BookingState state, Integer from, Integer size) {
         //проверка, что пользователь существует
         userService.getUser(ownerId);
 
         List<Long> idsList = bookingRepository.findUserItemsBookingsIds(ownerId);
 
+        boolean isPagination;
+
+        if (from == null || size == null) {
+            isPagination = false;
+        } else {
+            //проверка корректности from и size
+            if (size <= 0 || from < 0)
+                throw new BadRequestException();
+            isPagination = true;
+        }
+
         if (idsList.isEmpty())
             return new ArrayList<>();
 
+        List<Booking> bookingList;
+
         switch (state) {
             case ALL:
-                return idsList.stream()
+                bookingList = idsList.stream()
                         .map(bookingRepository::findById)
                         .map(Optional::get)
                         .sorted((x, y) -> y.getStart().compareTo(x.getStart()))
                         .collect(Collectors.toList());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case CURRENT:
-                return idsList.stream()
+                bookingList = idsList.stream()
                         .map(bookingRepository::findById)
                         .map(Optional::get)
                         .filter((x) -> x.getStart().isBefore(LocalDateTime.now())
                                 && x.getEnd().isAfter(LocalDateTime.now()))
                         .sorted((x, y) -> y.getStart().compareTo(x.getStart()))
                         .collect(Collectors.toList());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case PAST:
-                return idsList.stream()
+                bookingList = idsList.stream()
                         .map(bookingRepository::findById)
                         .map(Optional::get)
                         .filter((x) -> x.getStart().isBefore(LocalDateTime.now())
                                 && x.getEnd().isBefore(LocalDateTime.now()))
                         .sorted((x, y) -> y.getStart().compareTo(x.getStart()))
                         .collect(Collectors.toList());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case FUTURE:
-                return idsList.stream()
+                bookingList = idsList.stream()
                         .map(bookingRepository::findById)
                         .map(Optional::get)
                         .filter((x) -> x.getStart().isAfter(LocalDateTime.now())
                                 && x.getEnd().isAfter(LocalDateTime.now()))
                         .sorted((x, y) -> y.getStart().compareTo(x.getStart()))
                         .collect(Collectors.toList());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case WAITING:
-                return idsList.stream()
+                bookingList = idsList.stream()
                         .map(bookingRepository::findById)
                         .map(Optional::get)
                         .filter((x) -> x.getStatus().equals(BookingStatus.WAITING))
                         .sorted((x, y) -> y.getStart().compareTo(x.getStart()))
                         .collect(Collectors.toList());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             case REJECTED:
-                return idsList.stream()
+                bookingList = idsList.stream()
                         .map(bookingRepository::findById)
                         .map(Optional::get)
                         .filter((x) -> x.getStatus().equals(BookingStatus.REJECTED))
                         .sorted((x, y) -> y.getStart().compareTo(x.getStart()))
                         .collect(Collectors.toList());
+
+                return isPagination ? bookingList.stream().skip(from).limit(size).collect(Collectors.toList())
+                        : bookingList;
             default:
                 throw new RuntimeException("Некорректный параметр state.");
         }

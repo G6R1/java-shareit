@@ -9,10 +9,8 @@ import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +21,10 @@ import java.util.stream.Collectors;
 public class ItemController {
 
     final private ItemService itemService;
-    final private UserService userService;
 
     @Autowired
-    public ItemController(ItemService itemService, UserService userService) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
-        this.userService = userService;
     }
 
     @PostMapping()
@@ -48,9 +44,7 @@ public class ItemController {
                              @Valid @RequestBody ItemDto itemDto,
                              @RequestHeader("X-Sharer-User-Id") Long id) {
 
-        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto,
-                userService.getUser(id),
-                null));
+        Item savedItem = itemService.patchItem(itemId, itemDto, id);
         log.info("Выполнен запрос patchItem");
         return ItemMapper.toItemDto(savedItem);
     }
@@ -69,8 +63,10 @@ public class ItemController {
 
     //Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
     @GetMapping()
-    public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
-        List<ItemDtoForOwner> itemList = itemService.getMyItems(id);
+    public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id,
+                                                  @RequestParam(required = false) Integer from,
+                                                  @RequestParam(required = false) Integer size) {
+        List<ItemDtoForOwner> itemList = itemService.getMyItems(id, from, size);
         log.info("Выполнен запрос getMyItems");
         return itemList;
     }
@@ -83,9 +79,11 @@ public class ItemController {
      */
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text,
-                                           @RequestHeader("X-Sharer-User-Id") Long id) {
+                                           @RequestHeader("X-Sharer-User-Id") Long id,
+                                           @RequestParam(required = false) Integer from,
+                                           @RequestParam(required = false) Integer size) {
 
-        List<Item> foundItems = new ArrayList<>(itemService.searchItems(text));
+        List<Item> foundItems =itemService.searchItems(text, from, size);
         log.info("Выполнен запрос searchItems");
         return foundItems.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
