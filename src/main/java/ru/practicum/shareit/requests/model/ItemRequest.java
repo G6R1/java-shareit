@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,5 +27,5 @@ public class ItemRequest {
     @JoinColumn(name="requestor_id", nullable=false)
     private User requestor;
     @Column(name = "created")
-    private Instant created; //дата и время создания запроса
+    private LocalDateTime created; //дата и время создания запроса
 }

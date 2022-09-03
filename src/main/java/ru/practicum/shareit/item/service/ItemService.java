@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -9,9 +10,9 @@ import java.util.List;
 
 public interface ItemService {
 
-    Item createItem(Item noValidParamsItem);
+    Item createItem(ItemDto noValidParamsItem, Long creatorId);
 
-    Item patchItem(Long itemId, Item noValidParamsItem);
+    Item patchItem(Long itemId, ItemDto noValidParamsItem);
 
     Item getItem(Long itemId);
 

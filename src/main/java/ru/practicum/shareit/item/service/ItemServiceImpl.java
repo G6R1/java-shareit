@@ -7,17 +7,17 @@ import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.storage.BookingRepository;
-import ru.practicum.shareit.exceptions.AccessDeniedException;
-import ru.practicum.shareit.exceptions.BadRequestException;
-import ru.practicum.shareit.exceptions.InvalidParamException;
-import ru.practicum.shareit.exceptions.ItemNotFoundException;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.requests.service.ItemRequestService;
+import ru.practicum.shareit.requests.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
@@ -28,26 +28,39 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
 
 
     final private UserServiceImpl userService;
     final private BookingService bookingService;
+    final private ItemRequestRepository itemRequestRepository;
     final private BookingRepository bookingRepository;
     final private ItemRepository itemRepository;
     final private CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(UserServiceImpl userService, @Lazy BookingService bookingService, BookingRepository bookingRepository, ItemRepository itemRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(UserServiceImpl userService,
+                           @Lazy BookingService bookingService,
+                           ItemRequestRepository itemRequestRepository,
+                           BookingRepository bookingRepository,
+                           ItemRepository itemRepository,
+                           CommentRepository commentRepository) {
         this.userService = userService;
         this.bookingService = bookingService;
+        this.itemRequestRepository = itemRequestRepository;
         this.bookingRepository = bookingRepository;
         this.itemRepository = itemRepository;
         this.commentRepository = commentRepository;
     }
 
     @Override
-    public Item createItem(Item noValidParamsItem) {
+    public Item createItem(ItemDto itemDto, Long creatorId) {
+
+        Item noValidParamsItem = ItemMapper.toItem(itemDto,
+                userService.getUser(creatorId),
+                itemDto.getRequestId() == null ? null : itemRequestRepository.findById(itemDto.getRequestId())
+                        .orElseThrow(NotFoundException::new));
+
         if (noValidParamsItem.getId() != null)
             throw new RuntimeException(" Неверное значение id.");
 
@@ -63,7 +76,9 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Override
-    public Item patchItem(Long itemId, Item noValidParamsItem) {
+    public Item patchItem(Long itemId, ItemDto itemDto) {
+
+
         if (itemId == null)
             throw new RuntimeException(" Неверное значение id.");
 

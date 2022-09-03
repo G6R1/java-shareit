@@ -36,8 +36,7 @@ public class ItemController {
                               @RequestHeader("X-Sharer-User-Id") Long id) {
         ItemDto savedItemDto = ItemMapper
                 .toItemDto(itemService
-                        .createItem(ItemMapper
-                                .toItem(itemDto, userService.getUser(id), null)));
+                        .createItem(itemDto, id));
         log.info("Выполнен запрос createItem");
         return savedItemDto;
     }
