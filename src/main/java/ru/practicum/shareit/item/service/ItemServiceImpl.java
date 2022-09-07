@@ -187,7 +187,6 @@ public class ItemServiceImpl implements ItemService {
             itemList = itemRepository.searchItemsPageContainsTextAvailableTrue(text, from, size);
         }
 
-
         return itemList;
     }
 

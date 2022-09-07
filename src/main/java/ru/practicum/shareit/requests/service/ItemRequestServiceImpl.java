@@ -32,6 +32,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto createItemRequest(ItemRequestDto itemRequestDto, Long creatorId) {
+        if (itemRequestDto.getId() != null)
+            throw new RuntimeException(" Неверное значение id.");
+
         User requestor = userService.getUser(creatorId);
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requestor);
         itemRequest.setCreated(LocalDateTime.now());
