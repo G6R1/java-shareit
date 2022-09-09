@@ -57,4 +57,5 @@ public class UserController {
         userService.deleteUser(id);
         log.info("Выполнен запрос deleteUser");
     }
+
 }

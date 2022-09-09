@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,11 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 class BookingControllerTest {
 
+    @MockBean
+    BookingService bookingService;
     @Autowired
     MockMvc mockMvc;
-
-    //@MockBean
-    //private BookingService bookingService;
+    @Autowired
+    ObjectMapper mapper;
 
     @Test
     void createBooking() {
