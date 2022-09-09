@@ -29,7 +29,5 @@ public class BookingDto {
     private User booker;
     private BookingStatus status;
     private Long itemId;
-
-    //В тестах есть проверки этого поля, поэтому добавляю. Хотя и не поинмаю зачем, если есть поле booker. И с itemId похоже.
     private Long bookerId;
 }

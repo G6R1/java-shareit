@@ -13,6 +13,4 @@ public class ItemDto {
     private String description;
     private Boolean available;
     private Long requestId;
-    //если null,то null
-    //private Long requestId;
 }

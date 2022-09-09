@@ -8,13 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
-import ru.practicum.shareit.booking.storage.BookingRepository;
-import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.requests.ItemRequestMapper;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
@@ -25,7 +19,6 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

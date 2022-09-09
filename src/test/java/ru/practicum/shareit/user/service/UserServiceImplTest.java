@@ -8,17 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.exceptions.AccessDeniedException;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemRepository;
-import ru.practicum.shareit.requests.service.ItemRequestServiceImpl;
-import ru.practicum.shareit.requests.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
