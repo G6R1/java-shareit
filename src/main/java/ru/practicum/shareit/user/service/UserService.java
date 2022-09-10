@@ -2,7 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface UserService {
 
@@ -12,7 +12,7 @@ public interface UserService {
 
     User getUser(Long userId);
 
-    Collection<User> getAllUsers();
+    List<User> getAllUsers();
 
     boolean deleteUser(Long userId);
 

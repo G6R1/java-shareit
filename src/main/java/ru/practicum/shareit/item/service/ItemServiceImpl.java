@@ -199,6 +199,7 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(userService.getUser(createrId)); //здесь произойдет проверка корректности createrId
         comment.setCreated(LocalDateTime.now());
 
+
         if (!bookingService.getAllMyBookings(createrId, BookingState.PAST, null, null).stream()
                 .map(x -> x.getItem().getId())
                 .collect(Collectors.toList())
