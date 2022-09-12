@@ -49,17 +49,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(requestorId);
 
 
-        List<ItemRequestDto> itemRequestsDto = itemRequests.stream()
-                .map(ItemRequestMapper::toItemRequestDto)
-                .collect(Collectors.toList());
-
-        itemRequestsDto.forEach(x -> {
-            x.setItems(itemRepository.findAllByRequest_Id(x.getId()).stream()
-                    .map(ItemMapper::toItemDtoForItemRequest)
-                    .collect(Collectors.toList()));
-        });
-
-        return itemRequestsDto;
+        return toItemRequestDtos(itemRequests);
     }
 
     @Override
@@ -67,17 +57,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         //проверка корректности requestorId
         userService.getUser(requestorId);
 
-        List<ItemRequest> itemRequests;
+        List<ItemRequest> itemRequests = itemRequestRepository.findPageNotMyRequests(requestorId, from, size);
 
-        if (from == null || size == null) {
-            itemRequests = itemRequestRepository.findAllNotMyRequests(requestorId);
-        } else {
-            //проверка корректности from и size
-            if (size <= 0 || from < 0)
-                throw new BadRequestException();
-            itemRequests = itemRequestRepository.findPageNotMyRequests(requestorId, from, size);
-        }
+        return toItemRequestDtos(itemRequests);
+    }
 
+    private List<ItemRequestDto> toItemRequestDtos(List<ItemRequest> itemRequests) {
         List<ItemRequestDto> itemRequestsDto = itemRequests.stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .collect(Collectors.toList());

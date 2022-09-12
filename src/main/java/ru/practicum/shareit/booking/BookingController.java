@@ -1,17 +1,21 @@
 package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
+@Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
@@ -89,8 +93,8 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getAllMyBookings(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
                                              @RequestHeader("X-Sharer-User-Id") Long id,
-                                             @RequestParam(required = false) Integer from,
-                                             @RequestParam(required = false) Integer size) {
+                                             @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                             @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
 
         List<Booking> bookingList = bookingService.getAllMyBookings(id, state, from, size);
         log.info("Выполнен запрос getAllMyBookings");
@@ -110,8 +114,8 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsForMyItems(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
                                                      @RequestHeader("X-Sharer-User-Id") Long id,
-                                                     @RequestParam(required = false) Integer from,
-                                                     @RequestParam(required = false) Integer size) {
+                                                     @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                     @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
 
         List<Booking> bookingList = bookingService.getAllBookingsForMyItems(id, state, from, size);
         log.info("Выполнен запрос getAllBookingsForMyItems");

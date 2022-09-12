@@ -133,17 +133,7 @@ public class ItemServiceImpl implements ItemService {
         //проверка, существует ли такой пользователь
         userService.getUser(ownerId);
 
-
-        List<Item> itemList;
-
-        if (from == null || size == null) {
-            itemList = itemRepository.findAllByOwner_Id(ownerId);
-        } else {
-            //проверка корректности from и size
-            if (size <= 0 || from < 0)
-                throw new BadRequestException();
-            itemList = itemRepository.findPageByOwner_Id(ownerId, from, size);
-        }
+        List<Item> itemList = itemRepository.findPageByOwner_Id(ownerId, from, size);
 
         List<ItemDtoForOwner> itemDtoForOwners = itemList.stream()
                 .map(x -> {
@@ -176,18 +166,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank())
             return new ArrayList<>();
 
-        List<Item> itemList;
-
-        if (from == null || size == null) {
-            itemList = itemRepository.searchItemsContainsTextAvailableTrue(text);
-        } else {
-            //проверка корректности from и size
-            if (size <= 0 || from < 0)
-                throw new BadRequestException();
-            itemList = itemRepository.searchItemsPageContainsTextAvailableTrue(text, from, size);
-        }
-
-        return itemList;
+        return itemRepository.searchItemsPageContainsTextAvailableTrue(text, from, size);
     }
 
     /**
@@ -199,8 +178,9 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(userService.getUser(createrId)); //здесь произойдет проверка корректности createrId
         comment.setCreated(LocalDateTime.now());
 
-
-        if (!bookingService.getAllMyBookings(createrId, BookingState.PAST, null, null).stream()
+        if (!bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(createrId,
+                LocalDateTime.now(),
+                LocalDateTime.now()).stream()
                 .map(x -> x.getItem().getId())
                 .collect(Collectors.toList())
                 .contains(itemId))

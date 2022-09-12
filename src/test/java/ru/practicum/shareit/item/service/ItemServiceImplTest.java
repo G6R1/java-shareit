@@ -103,26 +103,29 @@ class ItemServiceImplTest {
     @Test
     void getMyItems() {
         when(userService.getUser(Mockito.anyLong())).thenReturn(user2);
-        when(itemRepository.findAllByOwner_Id(Mockito.anyLong())).thenReturn(List.of(item));
+        when(itemRepository.findPageByOwner_Id(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt()))
+                .thenReturn(List.of(item));
         when(commentRepository.findAllByItem_Id(Mockito.anyLong())).thenReturn(new ArrayList<>());
         when(bookingRepository.findAllByItem_IdOrderByStartDesc(Mockito.anyLong())).thenReturn(new ArrayList<>());
 
-        Assertions.assertEquals(itemService.getMyItems(2L, null, null).get(0).getId(), 1L);
+        Assertions.assertEquals(itemService.getMyItems(2L, 0, 100).get(0).getId(), 1L);
     }
 
     @Test
     void searchItems() {
-        Assertions.assertTrue(itemService.searchItems("", null, null).isEmpty());
-        when(itemRepository.searchItemsContainsTextAvailableTrue(Mockito.anyString())).thenReturn(List.of(item));
-        Assertions.assertEquals(itemService.searchItems("qqq", null, null).get(0).getId(), 1L);
+        Assertions.assertTrue(itemService.searchItems("", 0, 100).isEmpty());
+        when(itemRepository.searchItemsPageContainsTextAvailableTrue(Mockito.anyString(),
+                Mockito.anyInt(),
+                Mockito.anyInt()))
+                .thenReturn(List.of(item));
+        Assertions.assertEquals(itemService.searchItems("qqq", 0, 100).get(0).getId(), 1L);
     }
 
     @Test
     void createComment() {
         when(userService.getUser(Mockito.anyLong())).thenReturn(user1);
         when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(item));
-        when(bookingService.getAllMyBookings(Mockito.anyLong(),
-                Mockito.any(BookingState.class),
+        when(bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(Mockito.anyLong(),
                 Mockito.any(),
                 Mockito.any()))
                 .thenReturn(new ArrayList<>());

@@ -130,8 +130,8 @@ class BookingServiceImplTest {
 
         Assertions.assertTrue(bookingService.getAllMyBookings(1L,
                 BookingState.PAST,
-                null,
-                null)
+                0,
+                100)
                 .isEmpty());
     }
 

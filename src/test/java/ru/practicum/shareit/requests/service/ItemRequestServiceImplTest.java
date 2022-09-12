@@ -81,9 +81,10 @@ class ItemRequestServiceImplTest {
     @Test
     void getItemRequests() {
         when(userService.getUser(Mockito.anyLong())).thenReturn(user2);
-        when(itemRequestRepository.findAllNotMyRequests(Mockito.anyLong())).thenReturn(new ArrayList<>());
+        when(itemRequestRepository.findPageNotMyRequests(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt()))
+                .thenReturn(new ArrayList<>());
 
-        Assertions.assertTrue(itemRequestService.getItemRequests(null, null, 2L).isEmpty());
+        Assertions.assertTrue(itemRequestService.getItemRequests(0, 100, 2L).isEmpty());
     }
 
     @Test

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -11,12 +12,15 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RestController
+@Slf4j
+@Validated
 @RequestMapping("/items")
 public class ItemController {
 
@@ -64,8 +68,8 @@ public class ItemController {
     //Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
     @GetMapping()
     public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id,
-                                                  @RequestParam(required = false) Integer from,
-                                                  @RequestParam(required = false) Integer size) {
+                                                  @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                  @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
         List<ItemDtoForOwner> itemList = itemService.getMyItems(id, from, size);
         log.info("Выполнен запрос getMyItems");
         return itemList;
@@ -80,8 +84,8 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text,
                                            @RequestHeader("X-Sharer-User-Id") Long id,
-                                           @RequestParam(required = false) Integer from,
-                                           @RequestParam(required = false) Integer size) {
+                                           @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                           @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
 
         List<Item> foundItems =itemService.searchItems(text, from, size);
         log.info("Выполнен запрос searchItems");
@@ -99,8 +103,4 @@ public class ItemController {
         log.info("Выполнен запрос createComment");
         return CommentMapper.toCommentDto(comment);
     }
-
-    /*
-    Отзывы можно будет увидеть по двум эндпоинтам — по GET /items/{itemId} для одной конкретной вещи и по GET /items для всех вещей данного пользователя.
-     */
 }

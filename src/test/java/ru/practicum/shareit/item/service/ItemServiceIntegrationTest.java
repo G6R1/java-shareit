@@ -93,7 +93,7 @@ class ItemServiceIntegrationTest {
     void getMyItems() {
         userService.createUser(user);
         itemService.createItem(itemDto, 1L);
-        List<ItemDtoForOwner> savedItems = itemService.getMyItems(1L, null, null);
+        List<ItemDtoForOwner> savedItems = itemService.getMyItems(1L, 0, 100);
         Assertions.assertEquals(1, savedItems.size());
         Assertions.assertEquals(1L, savedItems.get(0).getId());
         Assertions.assertEquals("name", savedItems.get(0).getName());
@@ -104,7 +104,7 @@ class ItemServiceIntegrationTest {
     void searchItems() {
         userService.createUser(user);
         itemService.createItem(itemDto, 1L);
-        List<Item> savedItems = itemService.searchItems("name", null, null);
+        List<Item> savedItems = itemService.searchItems("name", 0, 100);
         Assertions.assertEquals(1, savedItems.size());
         Assertions.assertEquals(1L, savedItems.get(0).getId());
         Assertions.assertEquals("name", savedItems.get(0).getName());

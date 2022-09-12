@@ -92,17 +92,17 @@ class BookingServiceIntegrationTest {
         bookingService.createBooking(booking, 1L, 2L);
         TimeUnit.SECONDS.sleep(1);
         Assertions.assertEquals(1,
-                bookingService.getAllMyBookings(2L, BookingState.ALL, null, null).size());
+                bookingService.getAllMyBookings(2L, BookingState.ALL, 0, 100).size());
         Assertions.assertEquals(1,
-                bookingService.getAllMyBookings(2L, BookingState.WAITING, null, null).size());
+                bookingService.getAllMyBookings(2L, BookingState.WAITING, 0, 100).size());
         Assertions.assertEquals(0,
-                bookingService.getAllMyBookings(2L, BookingState.REJECTED, null, null).size());
+                bookingService.getAllMyBookings(2L, BookingState.REJECTED, 0, 100).size());
         Assertions.assertEquals(0,
-                bookingService.getAllMyBookings(2L, BookingState.CURRENT, null, null).size());
+                bookingService.getAllMyBookings(2L, BookingState.CURRENT, 0, 100).size());
         Assertions.assertEquals(1,
-                bookingService.getAllMyBookings(2L, BookingState.PAST, null, null).size());
+                bookingService.getAllMyBookings(2L, BookingState.PAST, 0, 100).size());
         Assertions.assertEquals(0,
-                bookingService.getAllMyBookings(2L, BookingState.FUTURE, null, null).size());
+                bookingService.getAllMyBookings(2L, BookingState.FUTURE, 0, 100).size());
     }
 
     @Test
@@ -113,16 +113,16 @@ class BookingServiceIntegrationTest {
         bookingService.createBooking(booking, 1L, 2L);
         TimeUnit.SECONDS.sleep(1);
         Assertions.assertEquals(1,
-                bookingService.getAllBookingsForMyItems(1L, BookingState.ALL, null, null).size());
+                bookingService.getAllBookingsForMyItems(1L, BookingState.ALL, 0, 100).size());
         Assertions.assertEquals(1,
-                bookingService.getAllBookingsForMyItems(1L, BookingState.WAITING, null, null).size());
+                bookingService.getAllBookingsForMyItems(1L, BookingState.WAITING, 0, 100).size());
         Assertions.assertEquals(0,
-                bookingService.getAllBookingsForMyItems(1L, BookingState.REJECTED, null, null).size());
+                bookingService.getAllBookingsForMyItems(1L, BookingState.REJECTED, 0, 100).size());
         Assertions.assertEquals(0,
-                bookingService.getAllBookingsForMyItems(1L, BookingState.CURRENT, null, null).size());
+                bookingService.getAllBookingsForMyItems(1L, BookingState.CURRENT, 0, 100).size());
         Assertions.assertEquals(1,
-                bookingService.getAllBookingsForMyItems(1L, BookingState.PAST, null, null).size());
+                bookingService.getAllBookingsForMyItems(1L, BookingState.PAST, 0, 100).size());
         Assertions.assertEquals(0,
-                bookingService.getAllBookingsForMyItems(1L, BookingState.FUTURE, null, null).size());
+                bookingService.getAllBookingsForMyItems(1L, BookingState.FUTURE, 0, 100).size());
     }
 }

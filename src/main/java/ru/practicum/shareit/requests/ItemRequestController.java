@@ -1,15 +1,19 @@
 package ru.practicum.shareit.requests;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
 import ru.practicum.shareit.requests.service.ItemRequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @Slf4j
+@Validated
 @RequestMapping(path = "/requests")
 public class ItemRequestController {
 
@@ -62,8 +66,8 @@ public class ItemRequestController {
      * @return -
      */
     @GetMapping("/all")
-    public List<ItemRequestDto> getItemRequests(@RequestParam(required = false)  Integer from,
-                                                @RequestParam(required = false) Integer size,
+    public List<ItemRequestDto> getItemRequests(@RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                @RequestParam(required = false, defaultValue = "100") @Positive Integer size,
                                                 @RequestHeader("X-Sharer-User-Id") Long id) {
 
         List<ItemRequestDto> itemRequests = itemRequestService.getItemRequests(from, size, id);

@@ -57,8 +57,8 @@ class ItemRequestServiceIntegrationTest {
         userService.createUser(requestor);
         userService.createUser(user);
         itemRequestService.createItemRequest(itemRequestDto, 1L);
-        List<ItemRequestDto> savedItemsRequestDto = itemRequestService.getItemRequests(null,
-                null,
+        List<ItemRequestDto> savedItemsRequestDto = itemRequestService.getItemRequests(0,
+                100,
                 2L);
         Assertions.assertEquals(1, savedItemsRequestDto.size());
         Assertions.assertEquals(1L, savedItemsRequestDto.get(0).getId());
