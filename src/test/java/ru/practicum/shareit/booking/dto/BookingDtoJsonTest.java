@@ -20,8 +20,8 @@ class BookingDtoJsonTest {
 
     @Test
     void testBookingDto() throws Exception {
-        LocalDateTime start = LocalDateTime.now();
-        LocalDateTime end = LocalDateTime.now().plusDays(1);
+        LocalDateTime start = LocalDateTime.of(1999, 12, 20, 3, 43, 34);
+        LocalDateTime end = start.plusDays(1);
 
 
         BookingDto bookingDto = new BookingDto(1L,
@@ -36,8 +36,8 @@ class BookingDtoJsonTest {
         JsonContent<BookingDto> result = json.write(bookingDto);
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(result).extractingJsonPathValue("$.start").isEqualTo(start.toString());
-        assertThat(result).extractingJsonPathValue("$.end").isEqualTo(end.toString());
+        assertThat(result).extractingJsonPathValue("$.start").isEqualTo("1999-12-20T03:43:34");
+        assertThat(result).extractingJsonPathValue("$.end").isEqualTo("1999-12-21T03:43:34");
         assertThat(result).extractingJsonPathStringValue("$.status").isEqualTo("WAITING");
         assertThat(result).extractingJsonPathNumberValue("$.itemId").isEqualTo(3);
         assertThat(result).extractingJsonPathNumberValue("$.bookerId").isEqualTo(5);
