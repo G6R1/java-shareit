@@ -7,7 +7,7 @@ import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-import java.util.Collection;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Collection<User> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 

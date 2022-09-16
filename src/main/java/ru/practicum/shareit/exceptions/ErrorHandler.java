@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.shareit.exceptions.model.ErrorResponse;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Objects;
 
 @Slf4j
@@ -32,6 +33,13 @@ public class ErrorHandler {
                 .split("]")[0]
                 .substring(2);
         return new ErrorResponse(String.format("Ошибка валидации, некорректный параметр %s", defaultMessage));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
+        log.info("error: ConstraintViolationException");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler

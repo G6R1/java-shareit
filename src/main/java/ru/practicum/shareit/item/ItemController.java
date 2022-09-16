@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -9,26 +10,25 @@ import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RestController
+@Slf4j
+@Validated
 @RequestMapping("/items")
 public class ItemController {
 
     final private ItemService itemService;
-    final private UserService userService;
 
     @Autowired
-    public ItemController(ItemService itemService, UserService userService) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
-        this.userService = userService;
     }
 
     @PostMapping()
@@ -36,8 +36,7 @@ public class ItemController {
                               @RequestHeader("X-Sharer-User-Id") Long id) {
         ItemDto savedItemDto = ItemMapper
                 .toItemDto(itemService
-                        .createItem(ItemMapper
-                                .toItem(itemDto, userService.getUser(id), null)));
+                        .createItem(itemDto, id));
         log.info("Выполнен запрос createItem");
         return savedItemDto;
     }
@@ -49,9 +48,7 @@ public class ItemController {
                              @Valid @RequestBody ItemDto itemDto,
                              @RequestHeader("X-Sharer-User-Id") Long id) {
 
-        Item savedItem = itemService.patchItem(itemId, ItemMapper.toItem(itemDto,
-                userService.getUser(id),
-                null));
+        Item savedItem = itemService.patchItem(itemId, itemDto, id);
         log.info("Выполнен запрос patchItem");
         return ItemMapper.toItemDto(savedItem);
     }
@@ -70,8 +67,10 @@ public class ItemController {
 
     //Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой. Эндпойнт GET /items.
     @GetMapping()
-    public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id) {
-        List<ItemDtoForOwner> itemList = itemService.getMyItems(id);
+    public Collection<ItemDtoForOwner> getMyItems(@RequestHeader("X-Sharer-User-Id") Long id,
+                                                  @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                  @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
+        List<ItemDtoForOwner> itemList = itemService.getMyItems(id, from, size);
         log.info("Выполнен запрос getMyItems");
         return itemList;
     }
@@ -84,9 +83,11 @@ public class ItemController {
      */
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text,
-                                           @RequestHeader("X-Sharer-User-Id") Long id) {
+                                           @RequestHeader("X-Sharer-User-Id") Long id,
+                                           @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                           @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
 
-        List<Item> foundItems = new ArrayList<>(itemService.searchItems(text));
+        List<Item> foundItems =itemService.searchItems(text, from, size);
         log.info("Выполнен запрос searchItems");
         return foundItems.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
@@ -102,8 +103,4 @@ public class ItemController {
         log.info("Выполнен запрос createComment");
         return CommentMapper.toCommentDto(comment);
     }
-
-    /*
-    Отзывы можно будет увидеть по двум эндпоинтам — по GET /items/{itemId} для одной конкретной вещи и по GET /items для всех вещей данного пользователя.
-     */
 }

@@ -1,17 +1,21 @@
 package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
+@Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
@@ -64,7 +68,7 @@ public class BookingController {
      * Эндпоинт — GET /bookings/{bookingId}.
      *
      * @param bookingId -
-     * @param id -
+     * @param id        -
      * @return -
      */
     @GetMapping("{bookingId}")
@@ -83,14 +87,16 @@ public class BookingController {
      * Бронирования должны возвращаться отсортированными по дате от более новых к более старым.
      *
      * @param state -
-     * @param id -
+     * @param id    -
      * @return -
      */
     @GetMapping
     public List<BookingDto> getAllMyBookings(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
-                                             @RequestHeader("X-Sharer-User-Id") Long id) {
+                                             @RequestHeader("X-Sharer-User-Id") Long id,
+                                             @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                             @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
 
-        List<Booking> bookingList = bookingService.getAllMyBookings(id, state);
+        List<Booking> bookingList = bookingService.getAllMyBookings(id, state, from, size);
         log.info("Выполнен запрос getAllMyBookings");
         return bookingList.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
@@ -100,15 +106,18 @@ public class BookingController {
      * Эндпоинт — GET /bookings/owner?state={state}.
      * Этот запрос имеет смысл для владельца хотя бы одной вещи.
      * Работа параметра state аналогична getAllMyBookings.
+     *
      * @param state -
-     * @param id -
+     * @param id    -
      * @return -
      */
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsForMyItems(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
-                                                     @RequestHeader("X-Sharer-User-Id") Long id) {
+                                                     @RequestHeader("X-Sharer-User-Id") Long id,
+                                                     @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                     @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
 
-        List<Booking> bookingList = bookingService.getAllBookingsForMyItems(id, state);
+        List<Booking> bookingList = bookingService.getAllBookingsForMyItems(id, state, from, size);
         log.info("Выполнен запрос getAllBookingsForMyItems");
         return bookingList.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }

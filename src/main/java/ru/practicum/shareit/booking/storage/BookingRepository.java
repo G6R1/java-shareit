@@ -14,20 +14,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBooker_IdOrderByStartDesc(@NotNull Long bookerId);
 
     List<Booking> findAllByStatusAndBooker_IdOrderByStartDesc(@NotNull BookingStatus status,
-                                                                     @NotNull Long bookerId);
-
+                                                              @NotNull Long bookerId);
 
     List<Booking> findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(@NotNull Long bookerId,
-                                                                                     @NotNull LocalDateTime start,
-                                                                                     @NotNull LocalDateTime end);
+                                                                              @NotNull LocalDateTime start,
+                                                                              @NotNull LocalDateTime end);
 
     List<Booking> findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(@NotNull Long bookerId,
-                                                                                      @NotNull LocalDateTime start,
-                                                                                      @NotNull LocalDateTime end);
-
+                                                                               @NotNull LocalDateTime start,
+                                                                               @NotNull LocalDateTime end);
     List<Booking> findAllByBooker_IdAndStartAfterAndEndAfterOrderByStartDesc(@NotNull Long bookerId,
-                                                                                    @NotNull LocalDateTime start,
-                                                                                    @NotNull LocalDateTime end);
+                                                                             @NotNull LocalDateTime start,
+                                                                             @NotNull LocalDateTime end);
 
     @Query(value = "select b.booking_id, b.start_time, b.end_time, b.item_id, b.booker_id, b.status " +
             "from bookings as b " +

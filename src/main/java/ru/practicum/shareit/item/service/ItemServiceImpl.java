@@ -7,47 +7,58 @@ import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.storage.BookingRepository;
-import ru.practicum.shareit.exceptions.AccessDeniedException;
-import ru.practicum.shareit.exceptions.BadRequestException;
-import ru.practicum.shareit.exceptions.InvalidParamException;
-import ru.practicum.shareit.exceptions.ItemNotFoundException;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.requests.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
 
 
     final private UserServiceImpl userService;
     final private BookingService bookingService;
+    final private ItemRequestRepository itemRequestRepository;
     final private BookingRepository bookingRepository;
     final private ItemRepository itemRepository;
     final private CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(UserServiceImpl userService, @Lazy BookingService bookingService, BookingRepository bookingRepository, ItemRepository itemRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(UserServiceImpl userService,
+                           @Lazy BookingService bookingService,
+                           ItemRequestRepository itemRequestRepository,
+                           BookingRepository bookingRepository,
+                           ItemRepository itemRepository,
+                           CommentRepository commentRepository) {
         this.userService = userService;
         this.bookingService = bookingService;
+        this.itemRequestRepository = itemRequestRepository;
         this.bookingRepository = bookingRepository;
         this.itemRepository = itemRepository;
         this.commentRepository = commentRepository;
     }
 
     @Override
-    public Item createItem(Item noValidParamsItem) {
+    public Item createItem(ItemDto itemDto, Long creatorId) {
+
+        Item noValidParamsItem = ItemMapper.toItem(itemDto,
+                userService.getUser(creatorId),
+                itemDto.getRequestId() == null ? null : itemRequestRepository.findById(itemDto.getRequestId())
+                        .orElseThrow(NotFoundException::new));
+
         if (noValidParamsItem.getId() != null)
             throw new RuntimeException(" Неверное значение id.");
 
@@ -63,23 +74,26 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Override
-    public Item patchItem(Long itemId, Item noValidParamsItem) {
+    public Item patchItem(Long itemId, ItemDto itemDto, Long requestorId) {
+
         if (itemId == null)
             throw new RuntimeException(" Неверное значение id.");
 
         Item oldItem = getItem(itemId);
 
+
         //проверка, что редактирует владелец вещи
-        if (!Objects.equals(noValidParamsItem.getOwner().getId(), oldItem.getOwner().getId()))
+        if (!Objects.equals(requestorId, oldItem.getOwner().getId()))
             throw new AccessDeniedException();
 
 
         return itemRepository.save(new Item(itemId,
-                noValidParamsItem.getName() == null ? oldItem.getName() : noValidParamsItem.getName(),
-                noValidParamsItem.getDescription() == null ? oldItem.getDescription() : noValidParamsItem.getDescription(),
-                noValidParamsItem.getAvailable() == null ? oldItem.getAvailable() : noValidParamsItem.getAvailable(),
+                itemDto.getName() == null ? oldItem.getName() : itemDto.getName(),
+                itemDto.getDescription() == null ? oldItem.getDescription() : itemDto.getDescription(),
+                itemDto.getAvailable() == null ? oldItem.getAvailable() : itemDto.getAvailable(),
                 oldItem.getOwner(),
-                null));
+                itemDto.getRequestId() == null ? null : itemRequestRepository.findById(itemDto.getRequestId())
+                        .orElseThrow(NotFoundException::new)));
     }
 
     @Override
@@ -115,12 +129,11 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Override
-    public List<ItemDtoForOwner> getMyItems(Long ownerId) {
+    public List<ItemDtoForOwner> getMyItems(Long ownerId, Integer from, Integer size) {
         //проверка, существует ли такой пользователь
         userService.getUser(ownerId);
 
-        List<Item> itemList = itemRepository.findAllByOwner_Id(ownerId);
-
+        List<Item> itemList = itemRepository.findPageByOwner_Id(ownerId, from, size);
 
         List<ItemDtoForOwner> itemDtoForOwners = itemList.stream()
                 .map(x -> {
@@ -138,10 +151,10 @@ public class ItemServiceImpl implements ItemService{
         return itemDtoForOwners;
     }
 
-    @Override
-    public List<Item> getAllItems() {
+    /* не используется
+    private List<Item> getAllItems() {
         return itemRepository.findAll();
-    }
+    }*/
 
     /* не используется
     public boolean deleteItem(Long itemId) {
@@ -149,11 +162,11 @@ public class ItemServiceImpl implements ItemService{
     }*/
 
     @Override
-    public Collection<Item> searchItems(String text) {
+    public List<Item> searchItems(String text, Integer from, Integer size) {
         if (text.isBlank())
             return new ArrayList<>();
 
-        return itemRepository.searchItemsContainsTextAvailableTrue(text);
+        return itemRepository.searchItemsPageContainsTextAvailableTrue(text, from, size);
     }
 
     /**
@@ -165,7 +178,9 @@ public class ItemServiceImpl implements ItemService{
         comment.setAuthor(userService.getUser(createrId)); //здесь произойдет проверка корректности createrId
         comment.setCreated(LocalDateTime.now());
 
-        if (!bookingService.getAllMyBookings(createrId, BookingState.PAST).stream()
+        if (!bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(createrId,
+                LocalDateTime.now(),
+                LocalDateTime.now()).stream()
                 .map(x -> x.getItem().getId())
                 .collect(Collectors.toList())
                 .contains(itemId))

@@ -13,7 +13,24 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query(value = "select * " +
             "from items as i " +
-            "where i.name ilike CONCAT('%', ?1, '%') or i.description ilike CONCAT('%', ?1, '%')" +
+            "where i.owner_id = ?1 " +
+            "LIMIT ?3 OFFSET ?2", nativeQuery = true)
+    List<Item> findPageByOwner_Id(@NotNull Long ownerId, @NotNull Integer from, @NotNull Integer size) ;
+
+    @Query(value = "select * " +
+            "from items as i " +
+            "where i.name ilike CONCAT('%', ?1, '%') or i.description ilike CONCAT('%', ?1, '%') " +
             "and i.available = true", nativeQuery = true)
     List<Item> searchItemsContainsTextAvailableTrue(@NotNull String text);
+
+    @Query(value = "select * " +
+            "from items as i " +
+            "where i.name ilike CONCAT('%', ?1, '%') or i.description ilike CONCAT('%', ?1, '%') " +
+            "and i.available = true " +
+            "LIMIT ?3 OFFSET ?2", nativeQuery = true)
+    List<Item> searchItemsPageContainsTextAvailableTrue(@NotNull String text,
+                                                               @NotNull Integer from,
+                                                               @NotNull Integer size) ;
+
+    List<Item> findAllByRequest_Id(Long requestId);
 }
