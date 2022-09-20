@@ -1,0 +1,122 @@
+package ru.practicum.shareit.booking;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.client.BookingClient;
+import ru.practicum.shareit.booking.dto.BookingDto;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
+
+@RestController
+@Slf4j
+@Validated
+@RequestMapping(path = "/bookings")
+public class BookingController {
+
+    private final BookingClient bookingClient;
+
+    public BookingController(BookingClient bookingClient) {
+        this.bookingClient = bookingClient;
+    }
+
+    /**
+     * Добавление нового запроса на бронирование.
+     * Запрос может быть создан любым пользователем, а затем подтверждён владельцем вещи.
+     * Эндпоинт — POST /bookings.
+     * После создания запрос находится в статусе WAITING — «ожидает подтверждения».
+     */
+    @PostMapping()
+    public BookingDto createBooking(@Valid @RequestBody BookingDto bookingDto,
+                                    @RequestHeader("X-Sharer-User-Id") Long id) {
+
+        BookingDto savedBooking = bookingClient.createBooking(bookingDto, id);
+        log.info("Выполнен запрос createBooking");
+        return savedBooking;
+    }
+
+    /**
+     * Подтверждение или отклонение запроса на бронирование.
+     * Может быть выполнено только владельцем вещи.
+     * Затем статус бронирования становится либо APPROVED, либо REJECTED.
+     * Эндпоинт — PATCH /bookings/{bookingId}?approved={approved},
+     *
+     * @param bookingId -
+     * @param approved  может принимать значения true или false.
+     * @return -
+     */
+    @PatchMapping("{bookingId}")
+    public BookingDto confirmBooking(@PathVariable Long bookingId,
+                                     @RequestParam Boolean approved,
+                                     @RequestHeader("X-Sharer-User-Id") Long id) {
+
+        BookingDto savedBooking = bookingClient.confirmBooking(bookingId, approved, id);
+        log.info("Выполнен запрос confirmBooking");
+        return savedBooking;
+    }
+
+    /**
+     * Получение данных о конкретном бронировании (включая его статус).
+     * Может быть выполнено либо автором бронирования, либо владельцем вещи, к которой относится бронирование.
+     * Эндпоинт — GET /bookings/{bookingId}.
+     *
+     * @param bookingId -
+     * @param id        -
+     * @return -
+     */
+    @GetMapping("{bookingId}")
+    public BookingDto getBooking(@PathVariable Long bookingId,
+                                 @RequestHeader("X-Sharer-User-Id") Long id) {
+
+        BookingDto booking = bookingClient.getBooking(bookingId, id);
+        log.info("Выполнен запрос getBooking");
+        return booking;
+    }
+
+    /**
+     * Получение списка всех бронирований текущего пользователя.
+     * Эндпоинт — GET /bookings?state={state}. Параметр state необязательный и по умолчанию равен ALL (англ. «все»).
+     * Также он может принимать значения CURRENT (англ. «текущие»), **PAST** (англ. «завершённые»),
+     * FUTURE (англ. «будущие»), WAITING (англ. «ожидающие подтверждения»), REJECTED (англ. «отклонённые»).
+     * Бронирования должны возвращаться отсортированными по дате от более новых к более старым.
+     *
+     * @param state -
+     * @param id    -
+     * @return -
+     */
+    @GetMapping
+    public List<BookingDto> getAllMyBookings(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
+                                             @RequestHeader("X-Sharer-User-Id") Long id,
+                                             @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                             @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
+
+        List<BookingDto> bookingList = bookingClient.getAllMyBookings(state, id, from, size);
+        log.info("Выполнен запрос getAllMyBookings");
+        return bookingList;
+    }
+
+    /**
+     * Получение списка бронирований для всех вещей текущего пользователя.
+     * Эндпоинт — GET /bookings/owner?state={state}.
+     * Этот запрос имеет смысл для владельца хотя бы одной вещи.
+     * Работа параметра state аналогична getAllMyBookings.
+     *
+     * @param state -
+     * @param id    -
+     * @return -
+     */
+    @GetMapping("/owner")
+    public List<BookingDto> getAllBookingsForMyItems(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
+                                                     @RequestHeader("X-Sharer-User-Id") Long id,
+                                                     @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                                     @RequestParam(required = false, defaultValue = "100") @Positive Integer size) {
+
+        List<BookingDto> bookingList = bookingClient.getAllBookingsForMyItems(state, id, from, size);
+        log.info("Выполнен запрос getAllBookingsForMyItems");
+        return bookingList;
+    }
+}
+
