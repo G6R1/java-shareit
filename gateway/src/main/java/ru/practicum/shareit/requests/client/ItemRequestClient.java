@@ -47,7 +47,7 @@ public class ItemRequestClient {
         return client.get()
                 .uri(serverUri + "/requests/all/"
                         + "?from=" + from
-                        + "&size=" +size)
+                        + "&size=" + size)
                 .header("X-Sharer-User-Id", String.valueOf(requetorId))
                 .retrieve()
                 .bodyToFlux(ItemRequestDto.class)

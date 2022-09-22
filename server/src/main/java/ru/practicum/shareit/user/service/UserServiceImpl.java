@@ -10,7 +10,7 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     final private UserRepository userRepository;
 
@@ -25,9 +25,9 @@ public class UserServiceImpl implements UserService{
             throw new RuntimeException(" Неверное значение id.");
 
         if (noValidParamUser.getName() == null
-            || noValidParamUser.getName().isBlank()
-            || noValidParamUser.getEmail() == null
-            || noValidParamUser.getEmail().isBlank())
+                || noValidParamUser.getName().isBlank()
+                || noValidParamUser.getEmail() == null
+                || noValidParamUser.getEmail().isBlank())
             throw new InvalidParamException(" Название и email не могут быть null/empty");
 
         return userRepository.save(noValidParamUser);

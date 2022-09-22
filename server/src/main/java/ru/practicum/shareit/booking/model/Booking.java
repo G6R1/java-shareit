@@ -31,10 +31,10 @@ public class Booking {
     @Column(name = "end_time")
     private LocalDateTime end; //дата и время конца бронирования
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="item_id", nullable=false)
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item; //вещь, которую пользователь бронирует
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="booker_id", nullable=false)
+    @JoinColumn(name = "booker_id", nullable = false)
     private User booker; //пользователь, который осуществляет бронирование
     @Enumerated(EnumType.STRING)
     private BookingStatus status;

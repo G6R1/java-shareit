@@ -55,7 +55,7 @@ public class ItemClient {
         return client.get()
                 .uri(serverUri + "/items/"
                         + "?from=" + from
-                        + "&size=" +size)
+                        + "&size=" + size)
                 .header("X-Sharer-User-Id", String.valueOf(requetorId))
                 .retrieve()
                 .bodyToFlux(ItemDtoForOwner.class)
@@ -68,7 +68,7 @@ public class ItemClient {
                 .uri(serverUri + "/items/search/"
                         + "?text=" + text
                         + "&from=" + from
-                        + "&size=" +size)
+                        + "&size=" + size)
                 .header("X-Sharer-User-Id", String.valueOf(requetorId))
                 .retrieve()
                 .bodyToFlux(ItemDto.class)
@@ -78,7 +78,7 @@ public class ItemClient {
 
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long requetorId) {
         return client.post()
-                .uri(serverUri + "/items/"+ itemId + "/comment")
+                .uri(serverUri + "/items/" + itemId + "/comment")
                 .body(Mono.just(commentDto), CommentDto.class)
                 .header("X-Sharer-User-Id", String.valueOf(requetorId))
                 .retrieve()

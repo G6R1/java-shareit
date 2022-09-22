@@ -83,7 +83,7 @@ public class ItemController {
                                            @RequestParam(required = false, defaultValue = "0") Integer from,
                                            @RequestParam(required = false, defaultValue = "100") Integer size) {
 
-        List<Item> foundItems =itemService.searchItems(text, from, size);
+        List<Item> foundItems = itemService.searchItems(text, from, size);
         log.info("Выполнен запрос searchItems");
         return foundItems.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }

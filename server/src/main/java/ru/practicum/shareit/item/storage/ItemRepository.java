@@ -16,7 +16,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "where i.owner_id = ?1 " +
             "ORDER BY i.item_id " +
             "LIMIT ?3 OFFSET ?2", nativeQuery = true)
-    List<Item> findPageByOwner_Id(@NotNull Long ownerId, @NotNull Integer from, @NotNull Integer size) ;
+    List<Item> findPageByOwner_Id(@NotNull Long ownerId, @NotNull Integer from, @NotNull Integer size);
 
     @Query(value = "select * " +
             "from items as i " +
@@ -30,8 +30,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "and i.available = true " +
             "LIMIT ?3 OFFSET ?2", nativeQuery = true)
     List<Item> searchItemsPageContainsTextAvailableTrue(@NotNull String text,
-                                                               @NotNull Integer from,
-                                                               @NotNull Integer size) ;
+                                                        @NotNull Integer from,
+                                                        @NotNull Integer size);
 
     List<Item> findAllByRequest_Id(Long requestId);
 }

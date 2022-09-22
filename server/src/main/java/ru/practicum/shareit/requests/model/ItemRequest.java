@@ -23,7 +23,7 @@ public class ItemRequest {
     @Column(name = "description")
     private String description;
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="requestor_id", nullable=false)
+    @JoinColumn(name = "requestor_id", nullable = false)
     private User requestor;
     @Column(name = "created")
     private LocalDateTime created; //дата и время создания запроса

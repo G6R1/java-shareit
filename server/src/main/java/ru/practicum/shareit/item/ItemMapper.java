@@ -22,7 +22,7 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() == null? null : item.getRequest().getId());
+                item.getRequest() == null ? null : item.getRequest().getId());
     }
 
     public static Item toItem(ItemDto itemDto, User owner, ItemRequest request) {
@@ -45,7 +45,7 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() == null? null : item.getRequest().getId(),
+                item.getRequest() == null ? null : item.getRequest().getId(),
                 BookingMapper.toBookingDto(last),
                 BookingMapper.toBookingDto(next),
                 null);
@@ -91,6 +91,6 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() == null? null : item.getRequest().getId());
+                item.getRequest() == null ? null : item.getRequest().getId());
     }
 }

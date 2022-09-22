@@ -129,9 +129,9 @@ class BookingServiceImplTest {
                 .thenReturn(new ArrayList<Booking>());
 
         Assertions.assertTrue(bookingService.getAllMyBookings(1L,
-                BookingState.PAST,
-                0,
-                100)
+                        BookingState.PAST,
+                        0,
+                        100)
                 .isEmpty());
     }
 

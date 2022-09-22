@@ -173,8 +173,8 @@ public class ItemServiceImpl implements ItemService {
         comment.setCreated(LocalDateTime.now());
 
         if (!bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(createrId,
-                LocalDateTime.now(),
-                LocalDateTime.now()).stream()
+                        LocalDateTime.now(),
+                        LocalDateTime.now()).stream()
                 .map(x -> x.getItem().getId())
                 .collect(Collectors.toList())
                 .contains(itemId))
