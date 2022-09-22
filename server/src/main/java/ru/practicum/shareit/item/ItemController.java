@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
 
-    final private ItemService itemService;
+    private final ItemService itemService;
 
     @Autowired
     public ItemController(ItemService itemService) {

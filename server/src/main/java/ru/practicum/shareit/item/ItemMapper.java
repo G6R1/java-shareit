@@ -51,7 +51,7 @@ public class ItemMapper {
                 null);
     }
 
-    public static ItemDtoForOwner ItemDtoForOwnerFromItemAndBookingList(Item item, List<Booking> bookingList) {
+    public static ItemDtoForOwner itemDtoForOwnerFromItemAndBookingList(Item item, List<Booking> bookingList) {
 
         if (bookingList.isEmpty())
             return ItemMapper.toItemDtoForOwner(item, null, null);

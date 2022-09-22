@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 @Service
 public class BookingServiceImpl implements BookingService {
 
-    final private BookingRepository bookingRepository;
-    final private UserService userService;
-    final private ItemService itemService;
+    private final BookingRepository bookingRepository;
+    private final UserService userService;
+    private final ItemService itemService;
 
     public BookingServiceImpl(BookingRepository bookingRepository, UserService userService, ItemService itemService) {
         this.bookingRepository = bookingRepository;

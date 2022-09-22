@@ -26,11 +26,11 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
 
-    final private UserServiceImpl userService;
-    final private ItemRequestRepository itemRequestRepository;
-    final private BookingRepository bookingRepository;
-    final private ItemRepository itemRepository;
-    final private CommentRepository commentRepository;
+    private final UserServiceImpl userService;
+    private final ItemRequestRepository itemRequestRepository;
+    private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
+    private final CommentRepository commentRepository;
 
     @Autowired
     public ItemServiceImpl(UserServiceImpl userService,
@@ -111,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
 
         ItemDtoForOwner returnItemDto;
         if (Objects.equals(item.getOwner().getId(), requestorId)) {
-            returnItemDto = ItemMapper.ItemDtoForOwnerFromItemAndBookingList(item,
+            returnItemDto = ItemMapper.itemDtoForOwnerFromItemAndBookingList(item,
                     bookingRepository.findAllByItem_IdOrderByStartDesc(itemId));
         } else {
             returnItemDto = ItemMapper.toItemDtoForOwner(item, null, null);
@@ -132,7 +132,7 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDtoForOwner> itemDtoForOwners = itemList.stream()
                 .map(x -> {
                     List<Booking> bookingList = bookingRepository.findAllByItem_IdOrderByStartDesc(x.getId());
-                    return ItemMapper.ItemDtoForOwnerFromItemAndBookingList(x, bookingList);
+                    return ItemMapper.itemDtoForOwnerFromItemAndBookingList(x, bookingList);
                 })
                 .collect(Collectors.toList());
 
