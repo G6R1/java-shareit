@@ -53,33 +53,17 @@ public class ItemServiceImpl implements ItemService {
                 itemDto.getRequestId() == null ? null : itemRequestRepository.findById(itemDto.getRequestId())
                         .orElseThrow(NotFoundException::new));
 
-        if (noValidParamsItem.getId() != null)
-            throw new RuntimeException(" Неверное значение id.");
-
-        //валидируем параметры
-        if (noValidParamsItem.getName() == null
-                || noValidParamsItem.getName().isBlank()
-                || noValidParamsItem.getDescription() == null
-                || noValidParamsItem.getDescription().isBlank()
-                || noValidParamsItem.getAvailable() == null)
-            throw new InvalidParamException(" Название, описание и статус вещи не могут быть null/empty");
-
         return itemRepository.save(noValidParamsItem);
     }
 
     @Override
     public Item patchItem(Long itemId, ItemDto itemDto, Long requestorId) {
 
-        if (itemId == null)
-            throw new RuntimeException(" Неверное значение id.");
-
         Item oldItem = getItem(itemId);
-
 
         //проверка, что редактирует владелец вещи
         if (!Objects.equals(requestorId, oldItem.getOwner().getId()))
             throw new AccessDeniedException();
-
 
         return itemRepository.save(new Item(itemId,
                 itemDto.getName() == null ? oldItem.getName() : itemDto.getName(),

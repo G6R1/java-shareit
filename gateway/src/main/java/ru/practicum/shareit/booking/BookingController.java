@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exceptions.BadRequestException;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -33,8 +34,11 @@ public class BookingController {
     @PostMapping()
     public BookingDto createBooking(@Valid @RequestBody BookingDto bookingDto,
                                     @RequestHeader("X-Sharer-User-Id") Long id) {
+        if (bookingDto.getId() != null)
+            throw new InvalidParamException(" Неверное значение id.");
+
         if (bookingDto.getEnd().isBefore(bookingDto.getStart()))
-            throw new BadRequestException("end before start");
+            throw new InvalidParamException("end before start");
 
         BookingDto savedBooking = bookingClient.createBooking(bookingDto, id);
         log.info("Выполнен запрос createBooking");

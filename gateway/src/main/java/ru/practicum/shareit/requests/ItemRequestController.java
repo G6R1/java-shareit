@@ -3,6 +3,7 @@ package ru.practicum.shareit.requests;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.requests.client.ItemRequestClient;
 import ru.practicum.shareit.requests.dto.ItemRequestDto;
 
@@ -34,6 +35,9 @@ public class ItemRequestController {
     @PostMapping()
     public ItemRequestDto createItemRequest(@Valid @RequestBody ItemRequestDto itemRequestDto,
                                             @RequestHeader("X-Sharer-User-Id") Long id) {
+        if (itemRequestDto.getId() != null)
+            throw new InvalidParamException(" Неверное значение id.");
+
         ItemRequestDto savedRequest = itemRequestClient.createItemRequest(itemRequestDto, id);
         log.info("Выполнен запрос createItemRequest");
         return savedRequest;

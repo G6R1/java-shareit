@@ -28,6 +28,13 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidParamException(final InvalidParamException e) {
+        log.info("error: InvalidParamException");
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
         log.info("error: MethodArgumentNotValidException");
         String defaultMessage = e.getMessage()

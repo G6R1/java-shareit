@@ -34,9 +34,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking createBooking(Booking booking, Long itemId, Long bookerId) {
-        if (booking.getId() != null)
-            throw new RuntimeException(" Неверное значение id.");
-
         Item item = itemService.getItem(itemId);
         User booker = userService.getUser(bookerId);
 

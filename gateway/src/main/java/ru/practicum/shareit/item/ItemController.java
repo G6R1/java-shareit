@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -28,6 +29,16 @@ public class ItemController {
     @PostMapping()
     public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Long id) {
+        if (itemDto.getId() != null)
+            throw new InvalidParamException(" Неверное значение id.");
+
+        if (itemDto.getName() == null
+                || itemDto.getName().isBlank()
+                || itemDto.getDescription() == null
+                || itemDto.getDescription().isBlank()
+                || itemDto.getAvailable() == null)
+            throw new InvalidParamException(" Название, описание и статус вещи не могут быть null/empty");
+
         ItemDto savedItem = itemClient.createItem(itemDto, id);
         log.info("Выполнен запрос createItem");
         return savedItem;
@@ -39,6 +50,9 @@ public class ItemController {
     public ItemDto patchItem(@PathVariable Long itemId,
                              @Valid @RequestBody ItemDto itemDto,
                              @RequestHeader("X-Sharer-User-Id") Long id) {
+        if (itemId == null)
+            throw new InvalidParamException(" Неверное значение id.");
+
         ItemDto savedItem = itemClient.patchItem(itemId, itemDto, id);
         log.info("Выполнен запрос patchItem");
         return savedItem;

@@ -21,23 +21,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User noValidParamUser) {
-        if (noValidParamUser.getId() != null)
-            throw new RuntimeException(" Неверное значение id.");
-
-        if (noValidParamUser.getName() == null
-                || noValidParamUser.getName().isBlank()
-                || noValidParamUser.getEmail() == null
-                || noValidParamUser.getEmail().isBlank())
-            throw new InvalidParamException(" Название и email не могут быть null/empty");
-
         return userRepository.save(noValidParamUser);
     }
 
     @Override
     public User patchUser(Long userId, User noValidParamsUser) {
-        if (userId == null)
-            throw new RuntimeException(" Неверное значение id.");
-
         User oldUser = getUser(userId);
 
         return userRepository.save(new User(userId,
