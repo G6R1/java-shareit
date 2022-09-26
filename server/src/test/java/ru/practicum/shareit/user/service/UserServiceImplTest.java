@@ -34,9 +34,6 @@ class UserServiceImplTest {
 
     @Test
     void createUser() {
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            userService.createUser(user);
-        });
         user.setId(null);
 
         when(userRepository.save(Mockito.any(User.class))).thenReturn(user);

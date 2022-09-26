@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemMapper;
@@ -41,11 +43,13 @@ class ItemServiceIntegrationTest {
     Item item = new Item(null, "name", "desc", true, null, null);
     ItemDto itemDto = ItemMapper.toItemDto(item);
     Comment comment = new Comment(null, "text", null, null, LocalDateTime.now());
-    Booking booking = new Booking(null,
+    BookingDto bookingDto = new BookingDto(null,
             LocalDateTime.now(),
             LocalDateTime.now(),
             null,
             null,
+            null,
+            1L,
             null);
 
     @Test
@@ -115,7 +119,7 @@ class ItemServiceIntegrationTest {
         userService.createUser(user);
         userService.createUser(commentator);
         itemService.createItem(itemDto, 1L);
-        bookingService.createBooking(booking, 1L, 2L);
+        bookingService.createBooking(bookingDto, 2L);
         TimeUnit.SECONDS.sleep(1);
         Comment savedComment = itemService.createComment(comment, 1L, 2L);
         Assertions.assertEquals(1L, savedComment.getId());

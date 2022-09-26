@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.requests.ItemRequestMapper;
@@ -37,6 +38,7 @@ class ItemRequestServiceImplTest {
     @InjectMocks
     private ItemRequestServiceImpl itemRequestService;
 
+    private ItemRequestDto itemRequestDto;
     private ItemRequest itemRequest;
     private Item item;
     private User user1;
@@ -44,6 +46,7 @@ class ItemRequestServiceImplTest {
 
     @BeforeEach
     public void initEach() {
+        itemRequestDto = new ItemRequestDto(null, "itemrequest desc", null, null);
         itemRequest = new ItemRequest(1L, "itemrequest desc", user1, LocalDateTime.now());
 
         user1 = new User(1L, "user1", "user1@email.ru");
@@ -60,9 +63,9 @@ class ItemRequestServiceImplTest {
 
     @Test
     void createItemRequest() {
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            itemRequestService.createItemRequest(ItemRequestMapper.toItemRequestDto(itemRequest), 1L);
-        });
+        when(itemRequestRepository.save(Mockito.any(ItemRequest.class))).thenReturn(itemRequest);
+
+        Assertions.assertEquals(itemRequestService.createItemRequest(itemRequestDto, 1L).getId(), 1L);
     }
 
     @Test

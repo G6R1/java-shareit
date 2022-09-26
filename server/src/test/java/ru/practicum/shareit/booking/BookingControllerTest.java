@@ -56,7 +56,7 @@ class BookingControllerTest {
 
     @Test
     void createBooking() throws Exception {
-        when(bookingService.createBooking(Mockito.any(Booking.class), Mockito.anyLong(), Mockito.anyLong()))
+        when(bookingService.createBooking(Mockito.any(BookingDto.class), Mockito.anyLong()))
                 .thenReturn(bookingWithId);
 
         mockMvc.perform(post("/bookings")

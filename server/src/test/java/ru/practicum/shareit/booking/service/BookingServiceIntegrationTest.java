@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -39,19 +41,21 @@ class BookingServiceIntegrationTest {
     User booker = new User(null, "booker", "booker@email.ru");
     Item item = new Item(null, "name", "desc", true, null, null);
     ItemDto itemDto = ItemMapper.toItemDto(item);
-    Booking booking = new Booking(null,
+    BookingDto bookingDto = new BookingDto(null,
             LocalDateTime.now(),
             LocalDateTime.now(),
             null,
             null,
-            null);
+            null,
+            1L,
+            2L);
 
     @Test
     void createBooking() {
         userService.createUser(user);
         userService.createUser(booker);
         itemService.createItem(itemDto, 1L);
-        var savedBooking = bookingService.createBooking(booking, 1L, 2L);
+        var savedBooking = bookingService.createBooking(bookingDto, 2L);
         Assertions.assertEquals(1L, savedBooking.getId());
         Assertions.assertEquals(1L, savedBooking.getItem().getId());
         Assertions.assertEquals(2L, savedBooking.getBooker().getId());
@@ -63,7 +67,7 @@ class BookingServiceIntegrationTest {
         userService.createUser(user);
         userService.createUser(booker);
         itemService.createItem(itemDto, 1L);
-        bookingService.createBooking(booking, 1L, 2L);
+        bookingService.createBooking(bookingDto, 2L);
         bookingService.confirmBooking(1L, true, 1L);
         var savedBooking = bookingService.getBooking(1L, 1L);
         Assertions.assertEquals(1L, savedBooking.getId());
@@ -76,7 +80,7 @@ class BookingServiceIntegrationTest {
         userService.createUser(user);
         userService.createUser(booker);
         itemService.createItem(itemDto, 1L);
-        bookingService.createBooking(booking, 1L, 2L);
+        bookingService.createBooking(bookingDto, 2L);
         var savedBooking = bookingService.getBooking(1L, 1L);
         Assertions.assertEquals(1L, savedBooking.getId());
         Assertions.assertEquals(1L, savedBooking.getItem().getId());
@@ -89,7 +93,7 @@ class BookingServiceIntegrationTest {
         userService.createUser(user);
         userService.createUser(booker);
         itemService.createItem(itemDto, 1L);
-        bookingService.createBooking(booking, 1L, 2L);
+        bookingService.createBooking(bookingDto, 2L);
         TimeUnit.SECONDS.sleep(1);
         Assertions.assertEquals(1,
                 bookingService.getAllMyBookings(2L, BookingState.ALL, 0, 100).size());
@@ -110,7 +114,7 @@ class BookingServiceIntegrationTest {
         userService.createUser(user);
         userService.createUser(booker);
         itemService.createItem(itemDto, 1L);
-        bookingService.createBooking(booking, 1L, 2L);
+        bookingService.createBooking(bookingDto, 2L);
         TimeUnit.SECONDS.sleep(1);
         Assertions.assertEquals(1,
                 bookingService.getAllBookingsForMyItems(1L, BookingState.ALL, 0, 100).size());

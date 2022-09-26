@@ -12,7 +12,9 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
 import ru.practicum.shareit.exceptions.BadRequestException;
+import ru.practicum.shareit.exceptions.InvalidParamException;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
@@ -34,10 +36,6 @@ class ItemServiceImplTest {
     @Mock
     private UserServiceImpl userService;
     @Mock
-    private BookingService bookingService;
-    @Mock
-    private ItemRequestRepository itemRequestRepository;
-    @Mock
     private BookingRepository bookingRepository;
     @Mock
     private ItemRepository itemRepository;
@@ -48,6 +46,7 @@ class ItemServiceImplTest {
     private ItemServiceImpl itemService;
 
     private Item item;
+    private ItemDto itemDto;
     private User user1;
     private User user2;
     private Comment comment;
@@ -63,6 +62,7 @@ class ItemServiceImplTest {
                 true,
                 user2,
                 null);
+        itemDto = new ItemDto(null, "name", "desc", true, null);
 
         comment = new Comment(1L, "text", item, user1, LocalDateTime.now());
     }
@@ -71,10 +71,9 @@ class ItemServiceImplTest {
     @Test
     void createItem() {
         when(userService.getUser(Mockito.anyLong())).thenReturn(user2);
+        when(itemRepository.save(Mockito.any(Item.class))).thenReturn(item);
 
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            itemService.createItem(ItemMapper.toItemDto(item), 2L);
-        });
+        Assertions.assertEquals(itemService.createItem(itemDto, 2L).getId(), 1L);
     }
 
     @Test

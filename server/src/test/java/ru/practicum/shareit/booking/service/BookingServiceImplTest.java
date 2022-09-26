@@ -8,8 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
@@ -44,18 +46,13 @@ class BookingServiceImplTest {
     private Item item;
     private User user1;
     private User user2;
+    private User user3;
 
     @BeforeEach
     public void initEach() {
-        booking = new Booking(1L,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null,
-                null,
-                BookingStatus.APPROVED);
-
         user1 = new User(1L, "user1", "user1@email.ru");
         user2 = new User(2L, "user2", "user2@email.ru");
+        user3 = new User(3L, "user3", "user3@email.ru");
 
         item = new Item(1L,
                 "item",
@@ -64,32 +61,22 @@ class BookingServiceImplTest {
                 user2,
                 null);
 
+        booking = new Booking(1L,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                item,
+                user3,
+                BookingStatus.APPROVED);
+
     }
 
     @Test
     void createBooking() { //проверить валидацию
         when(bookingRepository.save(booking)).thenReturn(booking);
         when(itemService.getItem(Mockito.anyLong())).thenReturn(item);
-        when(userService.getUser(Mockito.anyLong())).thenReturn(user1);
+        when(userService.getUser(Mockito.anyLong())).thenReturn(user3);
 
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            bookingService.createBooking(booking, 22L, 22L);
-        });
-
-        booking.setId(null);
-        item.setAvailable(false);
-
-        Assertions.assertThrows(ItemNotAvailableException.class, () -> {
-            bookingService.createBooking(booking, 22L, 22L);
-        });
-
-        item.setAvailable(true);
-
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            bookingService.createBooking(booking, 22L, 2L);
-        });
-
-        bookingService.createBooking(booking, 22L, 22L);
+        bookingService.createBooking(BookingMapper.toBookingDto(booking), 3L);
 
         Mockito.verify(bookingRepository, Mockito.times(1)).save(booking);
     }
@@ -126,7 +113,7 @@ class BookingServiceImplTest {
         when(userService.getUser(Mockito.anyLong())).thenReturn(user1);
         when(bookingRepository.findAllByBooker_IdAndStartBeforeAndEndBeforeOrderByStartDesc(Mockito.anyLong(),
                 Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class)))
-                .thenReturn(new ArrayList<Booking>());
+                .thenReturn(new ArrayList<>());
 
         Assertions.assertTrue(bookingService.getAllMyBookings(1L,
                         BookingState.PAST,
@@ -138,7 +125,7 @@ class BookingServiceImplTest {
     @Test
     void getAllBookingsForMyItems() {
         when(userService.getUser(Mockito.anyLong())).thenReturn(user1);
-        when(bookingRepository.findUserItemsBookingsIds(Mockito.anyLong())).thenReturn(new ArrayList<Long>());
+        when(bookingRepository.findUserItemsBookingsIds(Mockito.anyLong())).thenReturn(new ArrayList<>());
 
         Assertions.assertTrue(bookingService.getAllBookingsForMyItems(1L,
                         BookingState.PAST,

@@ -1,8 +1,10 @@
 package ru.practicum.shareit.booking.service;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
@@ -33,8 +35,8 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking createBooking(Booking booking, Long itemId, Long bookerId) {
-        Item item = itemService.getItem(itemId);
+    public Booking createBooking(BookingDto bookingDto, Long bookerId) {
+        Item item = itemService.getItem(bookingDto.getItemId());
         User booker = userService.getUser(bookerId);
 
         if (!item.getAvailable())
@@ -42,6 +44,8 @@ public class BookingServiceImpl implements BookingService {
 
         if (Objects.equals(bookerId, item.getOwner().getId()))
             throw new NotFoundException("Владелец не может бронировать собственную вещь.");
+
+        Booking booking = BookingMapper.toBooking(bookingDto, item, booker);
 
         booking.setItem(item);
         booking.setBooker(booker);

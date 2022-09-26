@@ -33,7 +33,7 @@ public class BookingController {
                                     @RequestHeader("X-Sharer-User-Id") Long id) {
 
 
-        Booking booking = bookingService.createBooking(BookingMapper.toBooking(bookingDto), bookingDto.getItemId(), id);
+        Booking booking = bookingService.createBooking(bookingDto, id);
         log.info("Выполнен запрос createBooking");
         return BookingMapper.toBookingDto(booking);
     }
