@@ -13,14 +13,14 @@ public class BookingMapper {
         if (booking == null)
             return null;
 
-        return new BookingDto(booking.getId() == null? null : booking.getId(),
+        return new BookingDto(booking.getId() == null ? null : booking.getId(),
                 booking.getStart(),
                 booking.getEnd(),
                 new ItemDto(booking.getItem().getId(),
                         booking.getItem().getName(),
                         booking.getItem().getDescription(),
                         booking.getItem().getAvailable(),
-                        booking.getItem().getRequest() == null? null : booking.getItem().getRequest().getId()),
+                        booking.getItem().getRequest() == null ? null : booking.getItem().getRequest().getId()),
                 new UserDto(booking.getBooker().getId(),
                         booking.getBooker().getName(),
                         booking.getBooker().getEmail()),
