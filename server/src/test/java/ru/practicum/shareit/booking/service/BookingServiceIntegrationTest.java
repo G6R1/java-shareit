@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@ContextConfiguration(classes= ShareItServer.class)
+@ContextConfiguration(classes = ShareItServer.class)
 class BookingServiceIntegrationTest {
 
     @Autowired

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-@ContextConfiguration(classes= ShareItServer.class)
+@ContextConfiguration(classes = ShareItServer.class)
 class BookingDtoJsonTest {
 
     @Autowired

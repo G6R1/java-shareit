@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase
-@ContextConfiguration(classes= ShareItServer.class)
+@ContextConfiguration(classes = ShareItServer.class)
 class BookingRepositoryTest {
 
     @Autowired

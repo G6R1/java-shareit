@@ -14,7 +14,7 @@ import ru.practicum.shareit.user.model.User;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase
-@ContextConfiguration(classes= ShareItServer.class)
+@ContextConfiguration(classes = ShareItServer.class)
 class UserRepositoryTest {
 
     @Autowired
