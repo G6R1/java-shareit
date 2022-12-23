@@ -39,4 +39,4 @@ Id текущего пользователя передается в загол�
 * GET /requests/all - получить список запросов, созданных другими пользователями.
 
 ## Схема базы данных
-![BD_scheme](https://github.com/G6R1/java-shareit/raw/main/bd_scheme.png)
+![BD_scheme](https://github.com/G6R1/java-shareit/raw/main/schemaBD.png)
